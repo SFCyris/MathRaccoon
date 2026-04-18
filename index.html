@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!--
+  Math Raccoon Arcade — © 2026 S. F. Cyris
+  Licensed under the Apache License, Version 2.0.
+  See LICENSE (http://www.apache.org/licenses/LICENSE-2.0) and NOTICE.md.
+
+  Math Raccoon™, Reading Raccoon™, Art Raccoon™, Painter Raccoon™,
+  and Ava's Hidden Valley™ are unregistered common-law trademarks of the
+  author. These marks are NOT licensed under Apache 2.0 — please rename any
+  public fork.
+
+  Source: https://github.com/SFCyris/MathRaccoon
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Raccoon Arcade</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/arcade.css" />
+  <link rel="stylesheet" href="css/games.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='54' font-size='54'%3E%F0%9F%A6%9D%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <!-- Animated background with playful characters -->
+  <div id="background-scene" aria-hidden="true"></div>
+
+  <!-- Main app root -->
+  <main id="app">
+    <!-- Animated title bar -->
+    <header class="title-bar">
+      <h1 class="game-title" aria-label="Math Raccoon">
+        <span class="letter" style="--i:0">M</span><span class="letter" style="--i:1">a</span><span class="letter" style="--i:2">t</span><span class="letter" style="--i:3">h</span><span class="letter space">&nbsp;</span><span class="letter" style="--i:4">R</span><span class="letter" style="--i:5">a</span><span class="letter" style="--i:6">c</span><span class="letter" style="--i:7">c</span><span class="letter" style="--i:8">o</span><span class="letter" style="--i:9">o</span><span class="letter" style="--i:10">n</span>
+      </h1>
+      <div class="title-sparkles">
+        <span class="sparkle">✦</span><span class="sparkle">✧</span><span class="sparkle">✦</span><span class="sparkle">✧</span>
+      </div>
+    </header>
+
+    <!-- Top controls -->
+    <div class="top-controls">
+      <button id="music-toggle" class="control-btn" aria-label="Toggle music" title="Music">
+        <span class="icon">🎵</span><span class="label">Music</span>
+      </button>
+      <button id="voice-toggle" class="control-btn" aria-label="Toggle read-aloud" title="Read aloud">
+        <span class="icon">🔊</span><span class="label">Read</span>
+      </button>
+      <button id="calm-toggle" class="control-btn" aria-label="Calm mode" title="Calm mode">
+        <span class="icon">🌙</span><span class="label">Calm</span>
+      </button>
+      <button id="friends-btn" class="control-btn" aria-label="Valley friends" title="Valley friends">
+        <span class="icon">🤗</span><span class="label">Friends</span>
+      </button>
+      <button id="journal-btn" class="control-btn" aria-label="Reading journal" title="Reading journal">
+        <span class="icon">📔</span><span class="label">Journal</span>
+      </button>
+      <button id="critters-btn" class="control-btn" aria-label="Critter Cam" title="Critter Cam">
+        <span class="icon">📷</span><span class="label">Critters</span>
+      </button>
+      <button id="trophies-btn" class="control-btn" aria-label="Trophies" title="Trophies">
+        <span class="icon">🏆</span><span class="label">Trophies</span>
+      </button>
+      <button id="reset-btn" class="control-btn" aria-label="Reset progress" title="Reset">
+        <span class="icon">🔄</span><span class="label">Reset</span>
+      </button>
+    </div>
+
+    <!-- Clickable raccoon top-right for teaching moments -->
+    <button id="help-btn" class="help-raccoon" aria-label="How to play" title="How does this work?">
+      <span class="help-pulse" aria-hidden="true"></span>
+      <span class="help-face" aria-hidden="true">🦝</span>
+      <span class="help-bubble">?</span>
+    </button>
+
+    <!-- Where pages get swapped in -->
+    <div id="screen" class="screen"></div>
+  </main>
+
+  <!-- Modal for trophies / reset confirm -->
+  <div id="modal" class="modal" hidden>
+    <div class="modal-card">
+      <button class="modal-close" aria-label="Close">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Core scripts -->
+  <script src="js/storage.js?v=2"></script>
+  <script src="js/voice.js?v=2"></script>
+  <script src="js/achievements.js?v=2"></script>
+  <script src="js/music.js?v=2"></script>
+  <script src="js/raccoon.js?v=2"></script>
+  <script src="js/animations.js?v=2"></script>
+  <script src="js/critters.js?v=1"></script>
+  <script src="js/gameRegistry.js?v=2"></script>
+
+  <!-- Engines (reusable across games) -->
+  <script src="js/engines/common.js?v=2"></script>
+  <script src="js/engines/additionEngine.js?v=2"></script>
+  <script src="js/engines/subtractionEngine.js?v=2"></script>
+  <script src="js/engines/multiplicationEngine.js?v=2"></script>
+  <script src="js/engines/divisionEngine.js?v=2"></script>
+  <script src="js/engines/fractionEngine.js?v=2"></script>
+  <script src="js/engines/placeValueEngine.js?v=2"></script>
+  <script src="js/engines/mixedEngine.js?v=2"></script>
+
+  <!-- Generic round runner (uses any engine) -->
+  <script src="js/gameRunner.js?v=3"></script>
+
+  <!-- Game registrations (each self-registers via MR.Games.register) -->
+  <script src="js/games/arcade.js?v=2"></script>
+  <script src="js/games/story.js?v=3"></script>
+
+  <!-- App last -->
+  <script src="js/app.js?v=3"></script>
+</body>
+</html>
