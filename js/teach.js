@@ -324,19 +324,55 @@
   }
 
   // Fact-family diamond: 3 × 4 = 12 with the three paired facts.
-  function vizFactFamily({ a, b, product, op = "×" }) {
+  function vizFactFamily({ a, b, product, op = "×", revealCount = null }) {
     const isAdd = op === "+";
     const fwd = isAdd ? "+" : "×";
     const inv = isAdd ? "−" : "÷";
+    const texts = [
+      `${a} ${fwd} ${b} = ${product}`,
+      `${b} ${fwd} ${a} = ${product}`,
+      `${product} ${inv} ${a} = ${b}`,
+      `${product} ${inv} ${b} = ${a}`,
+    ];
+    const rays = texts.map((t, i) => {
+      let cls = "teach-ff-ray";
+      if (revealCount != null) {
+        if (i < revealCount - 1) cls += " teach-ff-ray-lit";
+        else if (i === revealCount - 1) cls += " teach-ff-ray-lit teach-ff-ray-new";
+        else cls += " teach-ff-ray-dim";
+      }
+      return h("div", { class: cls }, t);
+    });
     return h("div", { class: "teach-viz teach-factfamily" }, [
       h("div", { class: "teach-ff-sun" }, String(product)),
-      h("div", { class: "teach-ff-rays" }, [
-        h("div", { class: "teach-ff-ray" }, `${a} ${fwd} ${b} = ${product}`),
-        h("div", { class: "teach-ff-ray" }, `${b} ${fwd} ${a} = ${product}`),
-        h("div", { class: "teach-ff-ray" }, `${product} ${inv} ${a} = ${b}`),
-        h("div", { class: "teach-ff-ray" }, `${product} ${inv} ${b} = ${a}`),
-      ]),
+      h("div", { class: "teach-ff-rays" }, rays),
     ]);
+  }
+
+  function vizDotCloud({ count, color = "#a78bfa", label = null }) {
+    const dots = [];
+    const cols = Math.ceil(Math.sqrt(count * 1.6));
+    const gap = 24;
+    const rows = Math.ceil(count / cols);
+    for (let i = 0; i < count; i++) {
+      const r = Math.floor(i / cols);
+      const c = i % cols;
+      const jitterX = ((i * 17) % 9) - 4;
+      const jitterY = ((i * 11) % 9) - 4;
+      const cx = c * gap + 14 + jitterX;
+      const cy = r * gap + 14 + jitterY;
+      dots.push(`<circle cx="${cx}" cy="${cy}" r="9" fill="${color}"/>`);
+    }
+    const w = cols * gap + 14, hh = rows * gap + 28;
+    return h("div", {
+      class: "teach-viz teach-dotcloud",
+      html: `<svg viewBox="0 0 ${w} ${hh}" role="img" aria-label="${count} loose dots">
+        ${dots.join("")}
+        ${label ? `<text x="${w / 2}" y="${hh - 4}" text-anchor="middle"
+                    font-family="Fredoka, sans-serif" font-size="14" font-weight="700"
+                    fill="#6b5b95">${label}</text>` : ""}
+      </svg>`,
+    });
   }
 
   // Equation line that highlights a specific part (e.g., step focus).
@@ -1202,20 +1238,16 @@
           watch: {
             equation: "12 ÷ 4 = ?  (using 3 × 4 = 12)",
             steps: [
-              { say: "Here's the fact family for 3, 4, and 12.",
-                viz: () => vizFactFamily({ a: 3, b: 4, product: 12 }) },
-              { say: "We know 3 × 4 = 12. So 4 × 3 = 12 too. (Order doesn't change the answer.)",
-                viz: () => vizEquationLine([
-                  { text: "3 × 4 = 12" }, { text: "  " }, { text: "4 × 3 = 12", cls: "teach-eq-answer" },
-                ]) },
-              { say: "The division facts come free: 12 ÷ 3 = 4, and 12 ÷ 4 = 3.",
-                viz: () => vizEquationLine([
-                  { text: "12 ÷ 3 = 4" }, { text: "  " }, { text: "12 ÷ 4 = 3", cls: "teach-eq-answer" },
-                ]) },
-              { say: "So 12 ÷ 4 = 3. We got it straight from our times tables!",
-                viz: () => vizEquationLine([
-                  { text: "12" }, { text: " ÷ " }, { text: "4" }, { text: " = " }, { text: "3", cls: "teach-eq-answer" },
-                ]) },
+              { say: "Meet the fact family: 3, 4, and 12 — all connected around the sun.",
+                viz: () => vizFactFamily({ a: 3, b: 4, product: 12, revealCount: 0 }) },
+              { say: "Light up the first fact: 3 × 4 = 12.",
+                viz: () => vizFactFamily({ a: 3, b: 4, product: 12, revealCount: 1 }) },
+              { say: "Turnaround: 4 × 3 = 12. Order doesn't change the answer.",
+                viz: () => vizFactFamily({ a: 3, b: 4, product: 12, revealCount: 2 }) },
+              { say: "Flip to division: 12 ÷ 3 = 4.",
+                viz: () => vizFactFamily({ a: 3, b: 4, product: 12, revealCount: 3 }) },
+              { say: "And the last one: 12 ÷ 4 = 3. Four facts, one family!",
+                viz: () => vizFactFamily({ a: 3, b: 4, product: 12, revealCount: 4 }) },
             ],
           },
           practice: [
@@ -1444,6 +1476,59 @@
             },
           ],
         },
+
+        {
+          id: "fraction-morph",
+          title: "See It Morph",
+          emoji: "🎞️",
+          tagline: "Same bar, more slices — still the same amount.",
+          grade: "Grade 3–4",
+          idea: {
+            story: "Beaver Baker cuts a pie in half — 1/2. Then she cuts both halves in half again — now it's 4 slices, 2 pink. '2/4 of the pie,' she winks. 'Same pink, just smaller pieces!'",
+            question: "Can a fraction wear a different outfit and still be the same?",
+            metaphor: "Split each slice in half — you double the top AND the bottom. The amount stays put.",
+            why: "1/2, 2/4, and 4/8 all fill the same space. When you multiply top and bottom by the same number, you're just slicing finer — the amount never changes. This is the heart of equivalent fractions, and it's why we can compare 3/6 to 1/2 with confidence.",
+            viz: () => vizFractionBar({ num: 1, den: 2, label: "1/2", color: "#ff9fb3" }),
+          },
+          watch: {
+            equation: "1/2 = 2/4 = 4/8",
+            steps: [
+              { say: "Start with 1/2. One slice out of two — the bar is shaded halfway.",
+                viz: () => vizFractionBar({ num: 1, den: 2, label: "1/2", color: "#ff9fb3" }) },
+              { say: "Now slice each half in half. Same pink area — but now it's 2 parts out of 4.",
+                viz: () => vizFractionBar({ num: 2, den: 4, label: "2/4 — same pink!", color: "#ff9fb3" }) },
+              { say: "Slice again. 4 parts shaded out of 8. The pink still stops at the same spot.",
+                viz: () => vizFractionBar({ num: 4, den: 8, label: "4/8 — same pink!", color: "#ff9fb3" }) },
+              { say: "One more: 8/16. More ticks, tinier slices — but the same amount of bar is pink.",
+                viz: () => vizFractionBar({ num: 8, den: 16, label: "8/16 — still half!", color: "#ff9fb3" }) },
+              { say: "1/2, 2/4, 4/8, 8/16 — all the same fraction wearing different outfits. That's equivalence!",
+                viz: () => vizFractionCompare({ a: { num: 1, den: 2 }, b: { num: 4, den: 8 }, relation: "=", colorA: "#ff9fb3", colorB: "#ff9fb3" }) },
+            ],
+          },
+          practice: [
+            {
+              prompt: "Is 1/3 the same as 2/6?",
+              answer: "They're equal",
+              options: ["1/3 is bigger", "2/6 is bigger", "They're equal", "Can't tell"],
+              hint: "Double top (1→2) AND bottom (3→6). Both doubled means the amount stays the same.",
+              viz: () => vizFractionCompare({ a: { num: 1, den: 3 }, b: { num: 2, den: 6 }, colorA: "#ff9fb3", colorB: "#ff9fb3" }),
+            },
+            {
+              prompt: "Which equals 1/2?",
+              answer: "3/6",
+              options: ["2/3", "3/6", "3/5", "2/5"],
+              hint: "3/6 — double top (1→3? No, ×3). Actually: 1×3=3 on top, 2×3=6 on bottom. Same trick, ×3 instead of ×2.",
+              viz: () => vizFractionBar({ num: 3, den: 6, label: "3/6", color: "#ff9fb3" }),
+            },
+            {
+              prompt: "If I split each slice of 2/4 in half, what do I get?",
+              answer: "4/8",
+              options: ["1/2", "3/6", "4/8", "8/16"],
+              hint: "Splitting slices in half doubles BOTH numbers: 2→4 and 4→8. Same pink, smaller slices.",
+              viz: () => vizFractionCompare({ a: { num: 2, den: 4 }, b: { num: 4, den: 8 }, relation: "=", colorA: "#ff9fb3", colorB: "#ff9fb3" }),
+            },
+          ],
+        },
       ],
     },
 
@@ -1473,16 +1558,16 @@
           watch: {
             equation: "3, 4, 7",
             steps: [
-              { say: "Three numbers: 3, 4, and 7. They form a fact family.",
-                viz: () => vizFactFamily({ a: 3, b: 4, product: 7, op: "+" }) },
+              { say: "Three numbers: 3, 4, and 7. Watch them light up as a family.",
+                viz: () => vizFactFamily({ a: 3, b: 4, product: 7, op: "+", revealCount: 0 }) },
               { say: "First fact: 3 + 4 = 7.",
-                viz: () => vizEquationLine([{text:"3"},{text:"+"},{text:"4"},{text:"="},{text:"7",cls:"teach-eq-answer"}]) },
+                viz: () => vizFactFamily({ a: 3, b: 4, product: 7, op: "+", revealCount: 1 }) },
               { say: "Turn it around: 4 + 3 = 7. Same family.",
-                viz: () => vizEquationLine([{text:"4"},{text:"+"},{text:"3"},{text:"="},{text:"7",cls:"teach-eq-answer"}]) },
+                viz: () => vizFactFamily({ a: 3, b: 4, product: 7, op: "+", revealCount: 2 }) },
               { say: "Flip to subtraction: 7 − 3 = 4.",
-                viz: () => vizEquationLine([{text:"7"},{text:"−"},{text:"3"},{text:"="},{text:"4",cls:"teach-eq-answer"}]) },
+                viz: () => vizFactFamily({ a: 3, b: 4, product: 7, op: "+", revealCount: 3 }) },
               { say: "And one more: 7 − 4 = 3. Four facts from one family!",
-                viz: () => vizEquationLine([{text:"7"},{text:"−"},{text:"4"},{text:"="},{text:"3",cls:"teach-eq-answer"}]) },
+                viz: () => vizFactFamily({ a: 3, b: 4, product: 7, op: "+", revealCount: 4 }) },
             ],
           },
           practice: [
@@ -1648,6 +1733,61 @@
             },
           ],
         },
+
+        {
+          id: "add-sub-hop-back",
+          title: "Hop There, Hop Back",
+          emoji: "🔄",
+          tagline: "+6 then −6 = right back where you started.",
+          grade: "Grade 3–4",
+          idea: {
+            story: "Math Raccoon stands on 5. He hops forward six — 1, 2, 3, 4, 5, 6 — and lands on 11. Then he turns around and hops back six. Guess where he lands?",
+            question: "If I add a number and then subtract the same number, where do I land?",
+            metaphor: "Add pushes forward. Subtract pulls back. Same number = same distance — you land right where you started.",
+            why: "This is the clearest picture of what 'inverse operations' really mean. Doing the opposite with the same number is a full undo. Once a kid feels this on a number line, missing-number problems and algebra both get a lot less mysterious.",
+            viz: () => vizNumberLine({ min: 3, max: 13, at: 5, label: "Start at 5" }),
+          },
+          watch: {
+            equation: "5 + 6 − 6 = ?",
+            steps: [
+              { say: "Math Raccoon is on 5. Nothing added yet.",
+                viz: () => vizNumberLine({ min: 3, max: 13, at: 5, label: "Start at 5" }) },
+              { say: "Hop forward one: now on 6.",
+                viz: () => vizNumberLine({ min: 3, max: 13, at: 6, hops: [6], label: "+1 → 6" }) },
+              { say: "Keep hopping forward — 7, 8, 9, 10, 11. That's six forward hops in all.",
+                viz: () => vizNumberLine({ min: 3, max: 13, at: 11, hops: [6,7,8,9,10,11], label: "5 + 6 = 11" }) },
+              { say: "Now turn around. Hop back one: 10.",
+                viz: () => vizNumberLine({ min: 3, max: 13, at: 10, hops: [10], visited: [6,7,8,9,10,11], dir: "down", label: "−1 → 10" }) },
+              { say: "Keep hopping back — 9, 8, 7, 6, 5. Six backward hops. Back where we started!",
+                viz: () => vizNumberLine({ min: 3, max: 13, at: 5, hops: [10,9,8,7,6,5], visited: [6,7,8,9,10,11], dir: "down", label: "11 − 6 = 5" }) },
+              { say: "5 + 6 − 6 = 5. The + and the − cancel. That's what 'inverse' means!",
+                viz: () => vizEquationLine([{text:"5"},{text:"+"},{text:"6"},{text:"−"},{text:"6"},{text:"="},{text:"5",cls:"teach-eq-answer"}]) },
+            ],
+          },
+          practice: [
+            {
+              prompt: "Start at 8. Add 4, then subtract 4. Where do you land?",
+              answer: 8,
+              options: [4, 8, 12, 16],
+              hint: "Forward and back the same amount — you never leave the start. 8 + 4 − 4 = 8.",
+              viz: () => vizNumberLine({ min: 6, max: 14, at: 8, label: "Start at 8" }),
+            },
+            {
+              prompt: "Start at 10. Subtract 3, then add 3. Where do you land?",
+              answer: 10,
+              options: [7, 10, 13, 16],
+              hint: "Back and forward the same amount — right back home. 10 − 3 + 3 = 10.",
+              viz: () => vizNumberLine({ min: 5, max: 15, at: 10, label: "Start at 10" }),
+            },
+            {
+              prompt: "If 15 + 7 = 22, what is 22 − 7?",
+              answer: 15,
+              options: [13, 14, 15, 16],
+              hint: "Adding 7 then taking 7 back = you're home. 22 − 7 = 15.",
+              viz: () => vizEquationLine([{text:"22"},{text:"−"},{text:"7"},{text:"="},{text:"?"}]),
+            },
+          ],
+        },
       ],
     },
 
@@ -1677,16 +1817,16 @@
           watch: {
             equation: "4, 6, 24",
             steps: [
-              { say: "Trio: 4, 6, and 24. The array is 4 rows of 6.",
-                viz: () => vizArray({ rows: 4, cols: 6, label: "4 × 6 = 24" }) },
-              { say: "First × fact: 4 × 6 = 24.",
-                viz: () => vizEquationLine([{text:"4"},{text:"×"},{text:"6"},{text:"="},{text:"24",cls:"teach-eq-answer"}]) },
-              { say: "Turn around: 6 × 4 = 24. Same array, viewed sideways.",
-                viz: () => vizEquationLine([{text:"6"},{text:"×"},{text:"4"},{text:"="},{text:"24",cls:"teach-eq-answer"}]) },
-              { say: "Split the 24 into rows: 24 ÷ 4 = 6.",
-                viz: () => vizEquationLine([{text:"24"},{text:"÷"},{text:"4"},{text:"="},{text:"6",cls:"teach-eq-answer"}]) },
+              { say: "Trio: 4, 6, and 24. All three gather around the sun.",
+                viz: () => vizFactFamily({ a: 4, b: 6, product: 24, revealCount: 0 }) },
+              { say: "Light the first × fact: 4 × 6 = 24.",
+                viz: () => vizFactFamily({ a: 4, b: 6, product: 24, revealCount: 1 }) },
+              { say: "Turnaround: 6 × 4 = 24. Same array, read sideways.",
+                viz: () => vizFactFamily({ a: 4, b: 6, product: 24, revealCount: 2 }) },
+              { say: "Split into rows: 24 ÷ 4 = 6.",
+                viz: () => vizFactFamily({ a: 4, b: 6, product: 24, revealCount: 3 }) },
               { say: "Or into columns: 24 ÷ 6 = 4. One family, four facts!",
-                viz: () => vizEquationLine([{text:"24"},{text:"÷"},{text:"6"},{text:"="},{text:"4",cls:"teach-eq-answer"}]) },
+                viz: () => vizFactFamily({ a: 4, b: 6, product: 24, revealCount: 4 }) },
             ],
           },
           practice: [
@@ -1849,6 +1989,59 @@
               options: [6, 7, 8, 9],
               hint: "Flip: 32 ÷ 4 = 8.",
               viz: () => vizEquationLine([{text:"4"},{text:"×"},{text:"?"},{text:"="},{text:"32"}]),
+            },
+          ],
+        },
+
+        {
+          id: "mul-div-regroup",
+          title: "Regroup and Snap",
+          emoji: "🔀",
+          tagline: "24 dots can snap into 4×6, or 6×4, or just 24 loose dots.",
+          grade: "Grade 3–4",
+          idea: {
+            story: "Fair Fox's 24 cookies sit in a neat 4-row tray. Market Mice scramble them into a pile. Rocky pushes them back — but this time into 6 rows instead of 4. 'Still 24!' he laughs. The tray didn't change the amount — just the shape.",
+            question: "If I know 4 × 6 = 24, why does that also tell me 24 ÷ 4 and 24 ÷ 6?",
+            metaphor: "Array = dots packed into rows. Division = unpacking the same dots a different way.",
+            why: "Multiplying builds an array from rows and columns. Dividing asks: 'given the total, how do the rows OR columns split?' Watching 24 dots scatter and re-pack as 6×4 shows why the same three numbers make four facts — the dots never change, only how we organize them.",
+            viz: () => vizArray({ rows: 4, cols: 6, label: "4 × 6 = 24" }),
+          },
+          watch: {
+            equation: "4 × 6 = 24, so 24 ÷ 4 = 6 and 24 ÷ 6 = 4",
+            steps: [
+              { say: "Start with Fair Fox's tray: 4 rows of 6 cookies. 4 × 6 = 24.",
+                viz: () => vizArray({ rows: 4, cols: 6, label: "4 rows × 6 = 24" }) },
+              { say: "Market Mice scatter them. Still 24 cookies — just loose now.",
+                viz: () => vizDotCloud({ count: 24, label: "24 loose dots" }) },
+              { say: "Rocky re-packs them — but this time 6 rows instead of 4. Notice: still 24.",
+                viz: () => vizArray({ rows: 6, cols: 4, label: "6 rows × 4 = 24" }) },
+              { say: "So 24 ÷ 6 = 4 (packed into 6 rows, each row has 4).",
+                viz: () => vizArray({ rows: 6, cols: 4, highlightRow: 0, label: "24 ÷ 6 = 4" }) },
+              { say: "And 24 ÷ 4 = 6 (packed into 4 rows, each row has 6). Same 24 dots, four stories!",
+                viz: () => vizArray({ rows: 4, cols: 6, highlightRow: 0, label: "24 ÷ 4 = 6" }) },
+            ],
+          },
+          practice: [
+            {
+              prompt: "3 rows of 5 = 15 dots. If you snap them into 5 rows, how many per row?",
+              answer: 3,
+              options: [2, 3, 4, 5],
+              hint: "Same 15 dots, different shape. 15 ÷ 5 = 3.",
+              viz: () => vizArray({ rows: 3, cols: 5, label: "3 × 5 = 15" }),
+            },
+            {
+              prompt: "4 × 7 = 28. If you regroup into 7 rows, how many per row?",
+              answer: 4,
+              options: [3, 4, 7, 28],
+              hint: "Rows and per-row swap: 4×7 becomes 7×4.",
+              viz: () => vizArray({ rows: 4, cols: 7, label: "4 × 7 = 28" }),
+            },
+            {
+              prompt: "You have 20 loose dots. If you snap them into rows of 5, how many rows?",
+              answer: 4,
+              options: [2, 4, 5, 10],
+              hint: "20 ÷ 5 = 4 rows.",
+              viz: () => vizDotCloud({ count: 20, label: "20 loose dots" }),
             },
           ],
         },

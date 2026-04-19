@@ -915,7 +915,36 @@
   border-radius: var(--radius-sm);
   text-align: center;
   border: 2px solid var(--c-lilac);
+  transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
 }
+.teach-ff-ray-dim {
+  background: #f3eef8;
+  color: #b8a9cf;
+  border-color: #e7dff1;
+  opacity: 0.45;
+}
+.teach-ff-ray-lit {
+  background: linear-gradient(135deg, #fff7e0, #ffe7b0);
+  color: var(--c-ink);
+  border-color: var(--c-peach, #f4a261);
+  box-shadow: 0 0 0 2px rgba(251,191,36,0.15), 0 4px 10px rgba(251,191,36,0.25);
+}
+.teach-ff-ray-new {
+  animation: teach-ff-pop 0.55s ease both;
+}
+@keyframes teach-ff-pop {
+  0%   { transform: scale(0.82); opacity: 0; }
+  55%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.teach-dotcloud {
+  padding: 8px 4px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.teach-dotcloud svg { max-width: 420px; width: 100%; height: auto; }
 
 /* Fraction bar + compare (for Compare Fractions op) */
 .teach-fracbar {
@@ -995,3 +1024,5 @@ body.calm-mode .teach-hint-panel { animation: none !important; }
 body.calm-mode .teach-struggle-panel { animation: none !important; }
 body.calm-mode .teach-eq-answer { animation: none !important; }
 body.calm-mode .teach-answer-btn.shake { animation: none !important; }
+body.calm-mode .teach-ff-ray-new { animation: none !important; }
+body.calm-mode .teach-ff-ray { transition: none !important; }
