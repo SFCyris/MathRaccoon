@@ -23,7 +23,7 @@
  * Provides each game a clean api for progress/score/round bookkeeping.
  */
 (function () {
-  const { Storage, Achievements, Music, Raccoon, Animations, Games, Voice, Critters } = window.MR;
+  const { Storage, Achievements, Music, Raccoon, Animations, Games, Voice, Critters, Teach } = window.MR;
 
   const screenEl = document.getElementById("screen");
   const modalEl  = document.getElementById("modal");
@@ -142,6 +142,7 @@
     const tabs = h("div", { class: "tab-bar", role: "tablist" }, [
       tabButton("arcade", "🎮 Arcade", activeTab === "arcade"),
       tabButton("story",  "📖 Story Mode", activeTab === "story"),
+      tabButton("teach",  "📚 Learn", activeTab === "teach"),
     ]);
 
     const paneHolder = h("div", { id: "tab-pane" });
@@ -287,7 +288,18 @@
   function renderTabPane(host) {
     host.innerHTML = "";
     if (activeTab === "arcade") host.append(renderArcadePane());
+    else if (activeTab === "teach") host.append(renderTeachPane());
     else host.append(renderStoryPane());
+  }
+
+  function renderTeachPane() {
+    if (Teach && Teach.renderHomePane) {
+      return h("div", {}, [
+        h("h2", { class: "section-title" }, "📚 Teaching Corner"),
+        Teach.renderHomePane(),
+      ]);
+    }
+    return h("div", {}, [h("p", {}, "Teaching Corner unavailable.")]);
   }
 
   // ----- Arcade pane -----
