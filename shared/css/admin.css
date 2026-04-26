@@ -1,0 +1,281 @@
+/*!
+ * admin.css — layout & UX for the Parent Admin view.
+ * Additive to components.css (existing .admin-section / .admin-table / .admin-pill
+ * / .toggle-row rules stay as-is). Loaded by both index.html (#/admin route)
+ * and admin.html.
+ */
+
+/* ---------- Sticky admin header ---------- */
+.admin-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: linear-gradient(180deg, rgba(246, 241, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 14px 16px 12px;
+  margin: -8px -8px 18px;
+  border-radius: var(--radius-md, 14px);
+  border: 1.5px solid rgba(58, 46, 95, 0.08);
+  box-shadow: 0 2px 10px -8px rgba(58, 46, 95, 0.25);
+}
+.admin-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.admin-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-family: var(--font-display, "Poppins", sans-serif);
+  color: var(--c-ink, #3a2e5f);
+}
+.admin-subtitle {
+  margin: 2px 0 0;
+  color: var(--c-ink-soft, #6f6493);
+  font-size: 0.9rem;
+}
+.admin-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.admin-header-actions .btn {
+  padding: 8px 14px;
+  font-size: 0.95rem;
+}
+.admin-note {
+  margin-top: 10px;
+  min-height: 1.2em;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.admin-note:empty { min-height: 0; margin-top: 0; }
+
+/* ---------- Tab navigation ---------- */
+.admin-nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 14px;
+  border: 1.5px solid rgba(58, 46, 95, 0.06);
+}
+.admin-nav-btn {
+  background: transparent;
+  border: 2px solid transparent;
+  padding: 9px 14px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--c-ink-soft, #6f6493);
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.admin-nav-btn:hover:not(.active) {
+  background: rgba(255, 122, 147, 0.1);
+  color: var(--c-ink, #3a2e5f);
+}
+.admin-nav-btn.active {
+  background: #ff7a93;
+  color: #fff;
+  box-shadow: 0 2px 8px -4px rgba(255, 122, 147, 0.6);
+}
+.admin-nav-btn:focus-visible {
+  outline: 2px solid #ff7a93;
+  outline-offset: 2px;
+}
+
+/* ---------- Stat cards (Overview tab) ---------- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.stat-card {
+  padding: 16px 14px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff 0%, #fff8fb 100%);
+  border: 1.5px dashed #e2d7ff;
+  text-align: center;
+}
+.stat-value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  font-family: var(--font-display, "Poppins", sans-serif);
+  color: #ff7a93;
+  line-height: 1.1;
+}
+.stat-label {
+  font-size: 0.82rem;
+  color: var(--c-ink-soft, #6f6493);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* ---------- Module progress cards ---------- */
+.module-progress-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+.module-progress-card {
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1.5px solid rgba(58, 46, 95, 0.08);
+}
+.module-pc-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+.module-pc-bar {
+  height: 10px;
+  border-radius: 6px;
+  background: rgba(58, 46, 95, 0.08);
+  overflow: hidden;
+}
+.module-pc-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease-out;
+}
+.module-pc-stat {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--c-ink-soft, #6f6493);
+  font-weight: 600;
+}
+
+/* ---------- Module filter chips ---------- */
+.module-filter {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.module-filter-btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(58, 46, 95, 0.15);
+  background: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--c-ink, #3a2e5f);
+}
+.module-filter-btn:hover:not(.active) {
+  background: rgba(255, 122, 147, 0.08);
+}
+.module-filter-btn.active {
+  background: #ff7a93;
+  color: #fff;
+  border-color: #ff7a93;
+}
+.module-filter-btn:focus-visible {
+  outline: 2px solid #ff7a93;
+  outline-offset: 2px;
+}
+
+/* ---------- Shared admin inputs ---------- */
+.admin-input {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 2px solid rgba(58, 46, 95, 0.15);
+  min-width: 180px;
+  background: #fff;
+  color: var(--c-ink, #3a2e5f);
+  transition: border-color 0.15s;
+}
+.admin-input:focus {
+  outline: none;
+  border-color: #ff7a93;
+}
+
+.row-inline {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.ws-count-input {
+  width: 72px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(58, 46, 95, 0.15);
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.btn-small {
+  padding: 6px 14px;
+  font-size: 0.9rem;
+}
+
+/* Danger-zone card accent */
+.admin-danger-card {
+  border: 1.5px solid #ffd2d7;
+  background: #fff5f6;
+}
+
+/* Volume slider cluster */
+.volume-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  max-width: 320px;
+}
+.volume-slider-wrap input[type="range"] { flex: 1; }
+
+.admin-tab-hint {
+  margin: 0 0 14px;
+  color: var(--c-ink-soft, #6f6493);
+  font-size: 0.9rem;
+}
+
+/* Section with no data */
+.admin-empty {
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1.5px dashed rgba(58, 46, 95, 0.15);
+  color: var(--c-ink-soft, #6f6493);
+  text-align: center;
+}
+
+/* ---------- Responsive tweaks ---------- */
+@media (max-width: 640px) {
+  .admin-header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .admin-header-actions {
+    justify-content: flex-start;
+  }
+  .admin-nav-btn {
+    font-size: 0.88rem;
+    padding: 8px 12px;
+  }
+  .stat-value { font-size: 1.6rem; }
+  .admin-title { font-size: 1.2rem; }
+}

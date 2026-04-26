@@ -1,0 +1,629 @@
+/*!
+ * teach.css — Teaching-Corner layout, cards, stepper, and viz styles.
+ */
+
+/* ==========================================================================
+   Teach home pane (Learn tab — big op cards)
+   ========================================================================== */
+.teach-home-pane { display: grid; gap: 18px; }
+.teach-op-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+  margin: 4px 0 8px;
+}
+.teach-op-card {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 22px 20px;
+  border-radius: var(--radius-lg);
+  background: white;
+  border: 4px solid transparent;
+  box-shadow: var(--shadow-pop, 0 10px 22px rgba(90,60,140,0.12));
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform var(--anim-mid) ease, box-shadow var(--anim-mid) ease, border-color var(--anim-mid) ease;
+}
+.teach-op-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--card-accent, #c4b5fd);
+  opacity: 0.17;
+  z-index: 0;
+  pointer-events: none;
+}
+.teach-op-card > * { position: relative; z-index: 1; }
+.teach-op-card:hover {
+  transform: translateY(-4px) rotate(-0.8deg);
+  box-shadow: 0 18px 32px rgba(90, 60, 140, 0.18);
+  border-color: var(--card-accent, #c4b5fd);
+}
+.teach-op-emoji {
+  font-size: 3rem;
+  line-height: 1;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.1));
+}
+.teach-op-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--c-ink);
+  letter-spacing: 0.3px;
+  margin: 0;
+}
+.teach-op-tagline {
+  font-size: 0.95rem;
+  color: var(--c-ink-soft);
+  margin: 0;
+  min-height: 1.2em;
+}
+.teach-op-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.teach-op-count {
+  background: var(--card-accent, #c4b5fd);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.8px;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.teach-op-progress {
+  font-size: 0.88rem;
+  color: var(--c-ink-soft);
+  font-weight: 700;
+}
+.teach-footnote {
+  text-align: center;
+  font-style: italic;
+  color: var(--c-ink-soft);
+  margin: 10px 0 0;
+  padding: 12px;
+  font-size: 0.98rem;
+}
+body.high-contrast .teach-op-card {
+  border: 3px solid var(--c-ink);
+}
+body.calm-mode .teach-op-card:hover {
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   Strategy picker (card grid)
+   ========================================================================== */
+.teach-strat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin: 18px 0 32px;
+}
+.teach-strat-card {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 20px 20px 22px;
+  border-radius: var(--radius-lg);
+  background: white;
+  border: 3px solid color-mix(in srgb, var(--card-accent, #a78bfa) 35%, white);
+  box-shadow: var(--shadow-soft);
+  text-align: left;
+  transition: transform var(--anim-fast) ease, box-shadow var(--anim-fast) ease, border-color var(--anim-fast) ease;
+  cursor: pointer;
+}
+.teach-strat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(90, 60, 140, 0.16);
+  border-color: var(--card-accent, #a78bfa);
+}
+.teach-strat-card.done {
+  background: linear-gradient(180deg, #fff 0%, color-mix(in srgb, var(--card-accent, #a78bfa) 8%, white) 100%);
+}
+.teach-strat-emoji {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+.teach-strat-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--c-ink);
+  letter-spacing: 0.3px;
+}
+.teach-strat-sub {
+  font-size: 0.95rem;
+  color: var(--c-ink-soft);
+}
+.teach-strat-meta {
+  margin-top: 4px;
+  font-weight: 700;
+  color: var(--card-accent, var(--c-berry));
+  font-size: 0.95rem;
+}
+
+body.high-contrast .teach-strat-card { border: 2px solid var(--c-ink); }
+
+/* ==========================================================================
+   Step bar
+   ========================================================================== */
+.teach-step-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 18px;
+  margin: 14px auto 12px;
+  max-width: 720px;
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+}
+.teach-step-label {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--c-ink);
+}
+.teach-step-dots {
+  display: flex;
+  gap: 8px;
+}
+.teach-step-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: rgba(58,46,95,0.14);
+  transition: background var(--anim-fast) ease, transform var(--anim-fast) ease;
+}
+.teach-step-dot.done   { background: var(--c-mint); }
+.teach-step-dot.active { background: var(--c-berry); transform: scale(1.25); }
+
+/* ==========================================================================
+   Teach card (the central lesson panel)
+   ========================================================================== */
+.teach-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 26px 24px;
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
+  margin: 0 auto;
+  border-top: 6px solid var(--card-accent, var(--c-berry));
+}
+.teach-card-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--c-ink);
+  margin: 0;
+}
+.teach-card-lede {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--c-ink);
+  margin: 0;
+}
+.teach-card-caption {
+  font-size: 0.98rem;
+  color: var(--c-ink-soft);
+  font-style: italic;
+  margin: 0;
+}
+.teach-card-nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+.teach-watch-counter,
+.teach-practice-counter {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--c-berry);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.teach-watch-eq {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--c-ink);
+  background: var(--c-cream);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+.teach-answer-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+.teach-done {
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  text-align: center;
+  padding: 12px 0 6px;
+}
+.teach-done-badge {
+  font-size: 3rem;
+  animation: teach-done-pop 0.7s cubic-bezier(.2,.9,.3,1.4);
+}
+@keyframes teach-done-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  70% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+body.calm-mode .teach-done-badge { animation: none !important; }
+
+.hero-title-compact { font-size: 1.6rem; }
+
+/* ==========================================================================
+   Viz: fact family (kept from v1)
+   ========================================================================== */
+.teach-viz { display: flex; align-items: center; justify-content: center; }
+.teach-factfamily {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+  align-items: center;
+  justify-items: center;
+  padding: 18px;
+}
+.teach-ff-sun {
+  grid-column: 1 / span 2;
+  width: 86px; height: 86px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, var(--c-sun), var(--c-peach));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--c-ink);
+  box-shadow: 0 8px 20px rgba(244,170,0,0.3);
+  margin-bottom: 8px;
+}
+.teach-ff-rays {
+  grid-column: 1 / span 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+  width: 100%;
+}
+.teach-ff-ray {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--c-cream);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  text-align: center;
+  transition: opacity var(--anim-mid) ease, transform var(--anim-mid) ease, background var(--anim-mid) ease;
+}
+.teach-ff-ray-dim { opacity: 0.35; }
+.teach-ff-ray-lit { background: var(--c-mint); }
+.teach-ff-ray-new { animation: ff-pop 0.55s cubic-bezier(.2,.9,.3,1.4); }
+@keyframes ff-pop {
+  0%   { transform: scale(0.6); opacity: 0; }
+  70%  { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+body.calm-mode .teach-ff-ray-new { animation: none !important; }
+body.calm-mode .teach-ff-ray     { transition: none !important; }
+
+/* ==========================================================================
+   Viz: beads
+   ========================================================================== */
+.teach-beads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+  justify-content: center;
+}
+.teach-bead {
+  font-size: 2rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+.teach-bead-a { color: var(--c-berry); }
+.teach-bead-b { color: var(--c-coral); }
+.teach-bead-pop { animation: bead-pop 0.5s cubic-bezier(.2,.9,.3,1.4); transform-origin: center; }
+@keyframes bead-pop {
+  0% { transform: scale(0.5); }
+  70% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+body.calm-mode .teach-bead-pop { animation: none !important; }
+
+/* ==========================================================================
+   Viz: number line / ten frame / place value / array / bar model / fraction
+   ========================================================================== */
+.teach-numline svg,
+.teach-barchart svg,
+.teach-barmodel svg,
+.teach-array svg,
+.teach-fraction svg,
+.teach-ruler svg,
+.teach-pv svg {
+  max-width: 100%;
+  height: auto;
+}
+.teach-tenframes-pair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.teach-tf-slot svg { max-width: 240px; height: auto; }
+.teach-plus {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--c-berry);
+}
+.teach-clock svg { max-width: 200px; height: auto; }
+
+/* ==========================================================================
+   Viz: digital clock & clock pair (elapsed-time teaching)
+   ========================================================================== */
+.teach-digital-clock svg { max-width: 260px; height: auto; }
+.teach-clock-pair {
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px 4px;
+}
+.teach-clock-pair-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.teach-clock-pair-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.teach-clock-pair-side svg { max-width: 170px; height: auto; }
+.teach-clock-pair-cap {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--c-ink-soft);
+  background: var(--c-cream);
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 2px solid var(--c-ink-soft);
+}
+.teach-clock-pair-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 4px;
+}
+.teach-clock-pair-arrow-icon {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2rem;
+  color: var(--c-berry);
+  line-height: 1;
+}
+.teach-clock-pair-arrow-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--c-berry);
+  background: #fff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 2px solid var(--c-berry);
+}
+
+/* ==========================================================================
+   Viz: equal groups
+   ========================================================================== */
+.teach-equalgroups { flex-direction: column; gap: 8px; padding: 10px; }
+.teach-eg-row {
+  display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
+}
+.teach-eg-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(24px, max-content));
+  gap: 4px;
+  padding: 10px 14px;
+  background: var(--c-cream);
+  border: 2px dashed var(--c-ink-soft);
+  border-radius: var(--radius-md);
+}
+.teach-eg-item { font-size: 1.4rem; line-height: 1; }
+.teach-eg-label {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--c-ink-soft);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Viz: shape grid
+   ========================================================================== */
+.teach-shapegrid { flex-direction: column; gap: 10px; padding: 10px; }
+.teach-shape-row {
+  display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
+}
+.teach-shape-tile {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  padding: 8px;
+  background: var(--c-cream);
+  border-radius: var(--radius-md);
+  min-width: 96px;
+}
+.teach-shape-tile svg { width: 76px; height: 76px; }
+.teach-shape-name {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--c-ink-soft);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Viz: tally
+   ========================================================================== */
+.teach-tally { flex-direction: column; gap: 8px; }
+.teach-tally-row {
+  display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+  font-family: var(--font-display); font-size: 2rem; color: var(--c-ink);
+}
+.teach-tally-bundle {
+  padding: 4px 10px;
+  background: var(--c-cream);
+  border-radius: var(--radius-sm);
+  letter-spacing: 1px;
+}
+
+/* ==========================================================================
+   Viz: timeline, pictograph, area grid, perimeter, coins, jug, story
+   ========================================================================== */
+.teach-timeline svg,
+.teach-areagrid svg,
+.teach-perimeter svg,
+.teach-jug svg { max-width: 100%; height: auto; }
+
+.teach-pictograph { flex-direction: column; gap: 8px; }
+.teach-pg-rows { display: grid; gap: 6px; padding: 6px 10px; }
+.teach-pg-row {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 10px;
+  align-items: center;
+  background: var(--c-cream);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+}
+.teach-pg-row-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--c-ink);
+  font-size: 0.95rem;
+}
+.teach-pg-row-icons { display: flex; gap: 4px; flex-wrap: wrap; }
+.teach-pg-icon { font-size: 1.3rem; line-height: 1; }
+.teach-pg-key {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--c-berry);
+  font-size: 0.95rem;
+  padding: 4px 10px;
+  border: 2px dashed var(--c-ink-soft);
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  margin: 0 auto;
+}
+
+.teach-coinset { flex-direction: column; gap: 8px; padding: 10px; }
+.teach-coin-row {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+}
+.teach-coin {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--coin-fill, #d4a373);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  min-width: 52px;
+  color: white;
+}
+.teach-coin-bill {
+  border-radius: var(--radius-sm);
+  min-width: 64px;
+}
+.teach-coin-emoji { font-size: 1.3rem; line-height: 1; }
+.teach-coin-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.teach-storyproblem { flex-direction: column; gap: 8px; padding: 6px 10px; }
+.teach-story-panel {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--c-cream);
+  border-radius: var(--radius-md);
+  border-left: 5px solid var(--c-berry);
+  align-items: start;
+}
+.teach-story-emoji { font-size: 2.4rem; line-height: 1; }
+.teach-story-text {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--c-ink);
+  line-height: 1.4;
+  grid-column: 2;
+}
+.teach-story-chips {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  grid-column: 2;
+  margin-top: 6px;
+}
+.teach-op-chip {
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: white;
+  border: 2px solid var(--c-ink-soft);
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--c-ink-soft);
+  font-size: 0.95rem;
+}
+.teach-op-chip.lit {
+  background: var(--c-berry);
+  border-color: var(--c-berry);
+  color: white;
+  box-shadow: 0 4px 10px rgba(155,120,220,0.3);
+}
+
+/* ==========================================================================
+   Word-problem engine (arcade/chapter story prompts)
+   ========================================================================== */
+.wp-story {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  line-height: 1.35;
+  color: var(--c-ink);
+  padding: 14px 18px;
+  background: #fff7e6;
+  border: 3px solid var(--c-ink);
+  border-radius: var(--radius-lg);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.08);
+  text-align: left;
+}
+.wp-visual { display: grid; justify-items: center; gap: 10px; margin-top: 14px; }
+.wp-emoji { font-size: 2.4rem; line-height: 1; }
+.wp-hint-bar {
+  font-style: italic;
+  color: var(--c-ink-soft);
+  font-size: 0.95rem;
+}

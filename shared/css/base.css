@@ -1,0 +1,142 @@
+/*!
+ * Math Raccoon v2 — © 2026 S. F. Cyris · Apache 2.0
+ * Design tokens, reset, calm-mode & high-contrast overrides.
+ * Palette preserved from v1.
+ */
+
+:root {
+  /* v1 palette — warm, saturated, friendly */
+  --c-coral:   #ff7a93;
+  --c-peach:   #ffb077;
+  --c-sun:     #ffd93d;
+  --c-mint:    #6ee7b7;
+  --c-sky:     #7dd3fc;
+  --c-lilac:   #c4b5fd;
+  --c-berry:   #a78bfa;
+  --c-cream:   #fff8ed;
+  --c-ink:     #3a2e5f;
+  --c-ink-soft:#6b5b95;
+
+  /* Module accents (used on hub tiles + chapter badges) */
+  --c-arithmetic:  #f4c77a;
+  --c-measurement: #7dd3fc;
+  --c-geometry:    #6ee7b7;
+  --c-data:        #c4b5fd;
+
+  --grad-sky:  linear-gradient(180deg, #ffe1ec 0%, #fff4d6 35%, #d9f5ff 100%);
+
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+
+  --shadow-soft: 0 8px 24px rgba(90, 60, 140, 0.12);
+  --shadow-pop:  0 10px 0 rgba(58, 46, 95, 0.18);
+
+  --font-display: "Fredoka", "Comic Sans MS", "Baloo 2", system-ui, sans-serif;
+  --font-body:    "Nunito", "Quicksand", system-ui, -apple-system, sans-serif;
+
+  --anim-fast: 0.18s;
+  --anim-mid:  0.35s;
+  --anim-slow: 0.6s;
+}
+
+/* ---------- Reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  font-family: var(--font-body);
+  color: var(--c-ink);
+  background: var(--grad-sky);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+h1, h2, h3, h4 { font-family: var(--font-display); margin: 0; letter-spacing: 0.5px; }
+a { color: var(--c-berry); }
+
+#app {
+  position: relative;
+  z-index: 2;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 24px 80px;
+  min-height: 100vh;
+}
+
+/* ---------- Background scene (trees, flowers, clouds, creatures) ---------- */
+#background-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.bg-creature {
+  position: absolute;
+  will-change: transform;
+  opacity: 0.85;
+}
+.bg-creature.bg-cloud   { opacity: 0.95; }
+.bg-creature.bg-scenery { opacity: 1; }
+
+@media (max-width: 720px) {
+  .bg-creature.bg-scenery { display: none; }
+}
+
+.bg-sparkles { position: absolute; inset: 0; pointer-events: none; }
+.bg-sparkle {
+  position: absolute;
+  font-size: 1.4rem;
+  color: var(--c-sun);
+  animation: sparkle-twinkle 2.4s ease-in-out infinite;
+  text-shadow: 0 0 8px rgba(255, 217, 61, 0.55);
+}
+
+.hidden { display: none !important; }
+
+/* ---------- Calm mode ---------- *
+ * Toggle via body.calm-mode. Disables non-essential animations.
+ */
+body.calm-mode *,
+body.calm-mode *::before,
+body.calm-mode *::after {
+  animation-duration: 0.01s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01s !important;
+}
+body.calm-mode .bg-creature,
+body.calm-mode .bg-sparkles { display: none; }
+
+/* ---------- High contrast ---------- *
+ * Toggle via body.high-contrast. Swaps to stronger color pairs
+ * without changing structure. Defaults stay the v1 palette.
+ */
+body.high-contrast {
+  --c-ink:      #111;
+  --c-ink-soft: #333;
+  --c-cream:    #fff;
+  --grad-sky:   linear-gradient(180deg, #fff 0%, #fff 100%);
+  --c-coral:    #d81845;
+  --c-berry:    #5b22c9;
+  --c-mint:     #0a8a51;
+  --c-sky:      #0b72c8;
+  --c-peach:    #c44b00;
+  --c-sun:      #b87a00;
+  --c-lilac:    #7f4dff;
+  --shadow-soft: 0 0 0 2px #111;
+  --shadow-pop:  0 6px 0 #111;
+}
+body.high-contrast .card,
+body.high-contrast .tile,
+body.high-contrast .btn {
+  border: 2px solid var(--c-ink);
+}
+
+/* ---------- Prefers-reduced-motion (respects OS setting) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01s !important;
+    transition-duration: 0.01s !important;
+  }
+}

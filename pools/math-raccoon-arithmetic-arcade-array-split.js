@@ -1,0 +1,207 @@
+/*
+ * Pool: Array Split (Arithmetic · Arcade)
+ * =======================================
+ * Drag numbers into an equation so the two sides balance by the
+ * distributive property (3.OA.5). Uses `balance` kind.
+ *
+ * FORMAT:
+ *   {
+ *     "kind": "balance",
+ *     "prompt": "Complete the split so both sides equal.",
+ *     "leftLabel": "7 × 8",           // LEFT side text
+ *     "rightTemplate": "(7 × __) + (7 × __)",   // __ is each drop slot
+ *     "answer": ["5", "3"],           // tokens that fill the slots IN ORDER
+ *     "bank":   ["1", "2", "3", "4", "5", "6"], // all draggable tokens
+ *     "hint":   "5 + 3 = 8."
+ *   }
+ */
+MR.Pools.register({
+  "id": "ari-arcade-array-split",
+  "title": "Array Split",
+  "askedPerRound": 6,
+  "questions": [
+    { "kind": "balance",
+      "prompt": "Split 7 × 8 with the distributive property.",
+      "leftLabel": "7 × 8",
+      "rightTemplate": "(7 × __) + (7 × __)",
+      "answer": ["5", "3"],
+      "bank": ["1", "2", "3", "4", "5", "6"],
+      "hint": "The two splits must add up to 8." },
+
+    { "kind": "balance",
+      "prompt": "Split 6 × 9 into halves.",
+      "leftLabel": "6 × 9",
+      "rightTemplate": "(6 × __) + (6 × __)",
+      "answer": ["5", "4"],
+      "bank": ["2", "3", "4", "5", "6", "7"],
+      "hint": "9 = 5 + 4. Use what you know (6×5=30) plus (6×4=24)." },
+
+    { "kind": "balance",
+      "prompt": "Fill in the split for 4 × 7.",
+      "leftLabel": "4 × 7",
+      "rightTemplate": "(4 × 5) + (4 × __)",
+      "answer": ["2"],
+      "bank": ["1", "2", "3", "4", "5"],
+      "hint": "5 + ? = 7." },
+
+    { "kind": "balance",
+      "prompt": "Use doubles: split 6 × 8 into two 6×4s.",
+      "leftLabel": "6 × 8",
+      "rightTemplate": "(6 × __) + (6 × __)",
+      "answer": ["4", "4"],
+      "bank": ["2", "3", "4", "5", "6"],
+      "hint": "4 + 4 = 8." },
+
+    { "kind": "balance",
+      "prompt": "Split 9 × 7 cleverly.",
+      "leftLabel": "9 × 7",
+      "rightTemplate": "(9 × 5) + (9 × __)",
+      "answer": ["2"],
+      "bank": ["1", "2", "3", "4", "5"],
+      "hint": "5 + ? = 7. 9×5 = 45, plus 9×2 = 18 → 63." },
+
+    { "kind": "balance",
+      "prompt": "Finish the split for 8 × 6.",
+      "leftLabel": "8 × 6",
+      "rightTemplate": "(8 × 3) + (8 × __)",
+      "answer": ["3"],
+      "bank": ["1", "2", "3", "4", "5"],
+      "hint": "3 + ? = 6. Equal halves." },
+
+    { "kind": "balance",
+      "prompt": "Split 5 × 8 with both factors.",
+      "leftLabel": "5 × 8",
+      "rightTemplate": "(5 × __) + (5 × __)",
+      "answer": ["4", "4"],
+      "bank": ["2", "3", "4", "5", "6"],
+      "hint": "4 + 4 = 8. Doubles trick." },
+
+    { "kind": "balance",
+      "prompt": "Complete the distribution for 7 × 9.",
+      "leftLabel": "7 × 9",
+      "rightTemplate": "(7 × __) + (7 × __)",
+      "answer": ["5", "4"],
+      "bank": ["2", "3", "4", "5", "6"],
+      "hint": "5 + 4 = 9. 7×5=35, 7×4=28." },
+
+    { "kind": "balance",
+      "prompt": "Split 3 × 8 into halves.",
+      "leftLabel": "3 × 8",
+      "rightTemplate": "(3 × __) + (3 × __)",
+      "answer": ["4", "4"],
+      "bank": ["2", "3", "4", "5", "6"],
+      "hint": "4 + 4 = 8." },
+
+    { "kind": "balance",
+      "prompt": "Use the split for 8 × 9.",
+      "leftLabel": "8 × 9",
+      "rightTemplate": "(8 × 5) + (8 × __)",
+      "answer": ["4"],
+      "bank": ["2", "3", "4", "5", "6"],
+      "hint": "5 + 4 = 9." },
+
+    { "kind": "balance",
+      "prompt": "6 × 7 = ? Fill both sides.",
+      "leftLabel": "6 × 7",
+      "rightTemplate": "(6 × __) + (6 × __)",
+      "answer": ["5", "2"],
+      "bank": ["1", "2", "3", "4", "5"],
+      "hint": "5 + 2 = 7. 6×5=30, 6×2=12." },
+
+    { "kind": "balance",
+      "prompt": "Work through 4 × 8 as halves.",
+      "leftLabel": "4 × 8",
+      "rightTemplate": "(4 × __) + (4 × __)",
+      "answer": ["4", "4"],
+      "bank": ["2", "3", "4", "5", "6"],
+      "hint": "Equal halves of 8." },
+
+    { "kind": "balance",
+      "prompt": "Split 5 × 9 cleverly.",
+      "leftLabel": "5 × 9",
+      "rightTemplate": "(5 × 5) + (5 × __)",
+      "answer": ["4"],
+      "bank": ["2", "3", "4", "5"],
+      "hint": "5 + 4 = 9. 5×5=25, 5×4=20." },
+
+    { "kind": "balance",
+      "prompt": "Split 6 × 6 into halves.",
+      "leftLabel": "6 × 6",
+      "rightTemplate": "(6 × __) + (6 × __)",
+      "answer": ["3", "3"],
+      "bank": ["2", "3", "4", "5"],
+      "hint": "3 + 3 = 6. Easy halves." },
+
+    { "kind": "balance",
+      "prompt": "Finish 2 × 9.",
+      "leftLabel": "2 × 9",
+      "rightTemplate": "(2 × 5) + (2 × __)",
+      "answer": ["4"],
+      "bank": ["2", "3", "4", "5"],
+      "hint": "5 + 4 = 9." },
+
+    { "kind": "balance",
+      "prompt": "Split 7 × 6 evenly.",
+      "leftLabel": "7 × 6",
+      "rightTemplate": "(7 × __) + (7 × __)",
+      "answer": ["3", "3"],
+      "bank": ["2", "3", "4", "5"],
+      "hint": "3 + 3 = 6." },
+
+    { "kind": "balance",
+      "prompt": "Finish 3 × 7.",
+      "leftLabel": "3 × 7",
+      "rightTemplate": "(3 × 5) + (3 × __)",
+      "answer": ["2"],
+      "bank": ["1", "2", "3", "4"],
+      "hint": "5 + 2 = 7." },
+
+    { "kind": "balance",
+      "prompt": "Split 9 × 6 in half.",
+      "leftLabel": "9 × 6",
+      "rightTemplate": "(9 × __) + (9 × __)",
+      "answer": ["3", "3"],
+      "bank": ["2", "3", "4", "5"],
+      "hint": "3 + 3 = 6." },
+
+    { "kind": "balance",
+      "prompt": "Use the 5+ trick for 4 × 9.",
+      "leftLabel": "4 × 9",
+      "rightTemplate": "(4 × 5) + (4 × __)",
+      "answer": ["4"],
+      "bank": ["2", "3", "4", "5"],
+      "hint": "5 + 4 = 9. 4×5=20, 4×4=16." },
+
+    { "kind": "balance",
+      "prompt": "Finish 8 × 7 cleverly.",
+      "leftLabel": "8 × 7",
+      "rightTemplate": "(8 × 5) + (8 × __)",
+      "answer": ["2"],
+      "bank": ["1", "2", "3", "4"],
+      "hint": "5 + 2 = 7. 8×5=40, 8×2=16." },
+
+    { "kind": "balance",
+      "prompt": "Split 5 × 6 in half.",
+      "leftLabel": "5 × 6",
+      "rightTemplate": "(5 × __) + (5 × __)",
+      "answer": ["3", "3"],
+      "bank": ["2", "3", "4", "5"],
+      "hint": "3 + 3 = 6." },
+
+    { "kind": "balance",
+      "prompt": "Split 2 × 7.",
+      "leftLabel": "2 × 7",
+      "rightTemplate": "(2 × __) + (2 × __)",
+      "answer": ["5", "2"],
+      "bank": ["1", "2", "3", "4", "5"],
+      "hint": "5 + 2 = 7." },
+
+    { "kind": "balance",
+      "prompt": "Finish 8 × 8 in half.",
+      "leftLabel": "8 × 8",
+      "rightTemplate": "(8 × __) + (8 × __)",
+      "answer": ["4", "4"],
+      "bank": ["2", "3", "4", "5"],
+      "hint": "Equal halves of 8." },
+  ],
+});

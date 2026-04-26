@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Math Raccoon — Parent Admin</title>
+  <meta name="description" content="Parent dashboard for Math Raccoon — save, load, and adjust settings." />
+  <meta name="robots" content="noindex" />
+
+  <!-- Core styles -->
+  <link rel="stylesheet" href="shared/css/base.css" />
+  <link rel="stylesheet" href="shared/css/components.css?v=7" />
+  <link rel="stylesheet" href="shared/css/animations.css?v=3" />
+  <link rel="stylesheet" href="shared/css/admin.css?v=1" />
+
+  <style>
+    /* Admin-only tweaks: the parent page doesn't need the playful background
+       scene, so keep the chrome calm and focused. */
+    body { background: linear-gradient(180deg, #f6f1ff 0%, #fff 60%); }
+    .admin-banner {
+      max-width: 960px; margin: 14px auto 0; padding: 10px 18px;
+      border-radius: 14px; background: #fff8e1; border: 1.5px solid #f4d78a;
+      color: #7a5b12; font-size: 0.95rem;
+    }
+    .admin-banner b { color: #5d4306; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <a href="index.html" class="app-brand"><span class="logo mr-raccoon">🦝</span> Math Raccoon</a>
+      <nav class="top-controls">
+        <a class="control-btn" href="index.html" title="Back to app">🏡 <span>Back to app</span></a>
+      </nav>
+    </header>
+
+    <div class="admin-banner">
+      <b>Parent area.</b> Use this page to save or restore a profile and to
+      adjust settings. Kids shouldn't need this — bookmark it for yourself.
+    </div>
+
+    <main id="screen"><!-- MR.Admin.render() mounts here --></main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Core (same order as index.html so IIFE deps resolve) -->
+  <script src="shared/js/core/strings.js?v=2"></script>
+  <script src="shared/js/core/storage.js?v=3"></script>
+  <script src="shared/js/core/content.js?v=3"></script>
+  <script src="shared/js/core/audio.js?v=10"></script>
+  <script src="shared/js/viz/registry.js?v=2"></script>
+  <script src="shared/js/core/settings.js?v=2"></script>
+  <script src="shared/js/core/progress.js?v=2"></script>
+  <script src="shared/js/core/achievements.js?v=3"></script>
+  <script src="shared/js/core/rewards.js?v=2"></script>
+  <script src="shared/js/core/pools.js?v=1"></script>
+  <script src="shared/js/core/daily-challenge.js?v=1"></script>
+  <script src="shared/js/core/worksheet.js?v=2"></script>
+  <script src="shared/js/core/save-load.js?v=1"></script>
+  <script src="shared/js/core/router.js?v=2"></script>
+
+  <!-- Strings data (needed for T() labels in admin UI) -->
+  <script src="shared/data/strings.en.js?v=2"></script>
+
+  <!-- Module manifests (needed so the per-game and per-chapter tables populate) -->
+  <script src="modules/arithmetic/module.js?v=2"></script>
+  <script src="modules/measurement/module.js?v=2"></script>
+  <script src="modules/geometry/module.js?v=3"></script>
+  <script src="modules/data/module.js?v=2"></script>
+  <script src="modules/reading/module.js?v=3"></script>
+
+  <!-- Arithmetic chapters -->
+  <script src="modules/arithmetic/chapters/ch-01-forest.js"></script>
+  <script src="modules/arithmetic/chapters/ch-02-brook.js"></script>
+  <script src="modules/arithmetic/chapters/ch-03-berries.js"></script>
+  <script src="modules/arithmetic/chapters/ch-04-mouse-market.js"></script>
+  <script src="modules/arithmetic/chapters/ch-05-library.js"></script>
+  <script src="modules/arithmetic/chapters/ch-06-bakery.js"></script>
+  <script src="modules/arithmetic/chapters/ch-07-night-sky.js"></script>
+  <script src="modules/arithmetic/chapters/ch-08-hedgehog-heist.js"></script>
+  <script src="modules/arithmetic/chapters/ch-09-fireflies.js"></script>
+  <script src="modules/arithmetic/chapters/ch-10-puppy-picnic.js"></script>
+  <script src="modules/arithmetic/chapters/ch-11-kitten-quilt.js"></script>
+  <script src="modules/arithmetic/chapters/ch-12-fox-fair.js"></script>
+  <script src="modules/arithmetic/chapters/ch-13-deer-dale.js"></script>
+  <script src="modules/arithmetic/chapters/ch-14-honey-hunt.js"></script>
+  <script src="modules/arithmetic/chapters/ch-15-thousand-stars.js"></script>
+  <script src="modules/arithmetic/chapters/ch-16-grand-revue.js"></script>
+
+  <!-- Arithmetic arcade · question pools (needed by worksheet generator) -->
+  <script src="pools/math-raccoon-arithmetic-arcade-bubble-blocks.js?v=1"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-treasure-trail.js?v=1"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-multiply-mountain.js?v=1"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-share-shack.js?v=1"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-pie-pals.js?v=2"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-place-parade.js?v=1"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-word-wander.js?v=1"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-story-solver.js?v=2"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-pattern-parade.js?v=1"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-round-up.js?v=1"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-thousand-quest.js?v=1"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-ten-times.js?v=1"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-array-split.js?v=1"></script>
+  <script src="pools/math-raccoon-arithmetic-arcade-fraction-match.js?v=1"></script>
+
+  <!-- Arithmetic arcade game registrations -->
+  <script src="modules/arithmetic/arcade/bubble-blocks.js?v=2"></script>
+  <script src="modules/arithmetic/arcade/treasure-trail.js?v=2"></script>
+  <script src="modules/arithmetic/arcade/multiply-mountain.js?v=2"></script>
+  <script src="modules/arithmetic/arcade/share-shack.js?v=2"></script>
+  <script src="modules/arithmetic/arcade/pie-pals.js?v=2"></script>
+  <script src="modules/arithmetic/arcade/place-parade.js?v=2"></script>
+  <script src="modules/arithmetic/arcade/word-wander.js?v=2"></script>
+  <script src="modules/arithmetic/arcade/story-solver.js?v=2"></script>
+  <script src="modules/arithmetic/arcade/pattern-parade.js?v=1"></script>
+  <script src="modules/arithmetic/arcade/round-up.js?v=1"></script>
+  <script src="modules/arithmetic/arcade/thousand-quest.js?v=1"></script>
+  <script src="modules/arithmetic/arcade/ten-times.js?v=1"></script>
+  <script src="modules/arithmetic/arcade/array-split.js?v=1"></script>
+  <script src="modules/arithmetic/arcade/fraction-match.js?v=1"></script>
+
+  <!-- Measurement content -->
+  <script src="modules/measurement/chapters/ch-01-ruler.js"></script>
+  <script src="modules/measurement/chapters/ch-02-clock.js"></script>
+  <script src="modules/measurement/chapters/ch-03-hour-hike.js"></script>
+  <script src="modules/measurement/chapters/ch-04-ribbon-market.js"></script>
+  <script src="modules/measurement/chapters/ch-05-pond-picnic.js"></script>
+  <script src="modules/measurement/chapters/ch-06-swap-shop.js?v=1"></script>
+  <script src="pools/math-raccoon-measurement-arcade-length-dash.js?v=2"></script>
+  <script src="pools/math-raccoon-measurement-arcade-clock-quest.js?v=1"></script>
+  <script src="pools/math-raccoon-measurement-arcade-hour-hop.js?v=2"></script>
+  <script src="pools/math-raccoon-measurement-arcade-coin-cart.js?v=1"></script>
+  <script src="pools/math-raccoon-measurement-arcade-jug-judge.js?v=1"></script>
+  <script src="pools/math-raccoon-measurement-arcade-unit-match.js?v=1"></script>
+  <script src="modules/measurement/arcade/length-dash.js?v=3"></script>
+  <script src="modules/measurement/arcade/clock-quest.js?v=2"></script>
+  <script src="modules/measurement/arcade/hour-hop.js?v=2"></script>
+  <script src="modules/measurement/arcade/coin-cart.js?v=2"></script>
+  <script src="modules/measurement/arcade/jug-judge.js?v=2"></script>
+  <script src="modules/measurement/arcade/unit-match.js?v=1"></script>
+
+  <!-- Geometry content -->
+  <script src="modules/geometry/chapters/ch-01-shape-scout.js"></script>
+  <script src="modules/geometry/chapters/ch-02-tile-town.js"></script>
+  <script src="modules/geometry/chapters/ch-03-garden-gala.js"></script>
+  <script src="modules/geometry/chapters/ch-04-quilt-fair.js"></script>
+  <script src="modules/geometry/chapters/ch-05-quadrilateral-quest.js?v=1"></script>
+  <script src="pools/math-raccoon-geometry-arcade-tile-tally.js?v=2"></script>
+  <script src="pools/math-raccoon-geometry-arcade-shape-sleuth.js?v=1"></script>
+  <script src="pools/math-raccoon-geometry-arcade-fence-frenzy.js?v=1"></script>
+  <script src="pools/math-raccoon-geometry-arcade-quad-quest.js?v=1"></script>
+  <script src="pools/math-raccoon-geometry-arcade-slice-shade.js?v=1"></script>
+  <script src="modules/geometry/arcade/tile-tally.js?v=3"></script>
+  <script src="modules/geometry/arcade/shape-sleuth.js?v=2"></script>
+  <script src="modules/geometry/arcade/fence-frenzy.js?v=2"></script>
+  <script src="modules/geometry/arcade/quad-quest.js?v=1"></script>
+  <script src="modules/geometry/arcade/slice-shade.js?v=1"></script>
+
+  <!-- Data content -->
+  <script src="modules/data/chapters/ch-01-tally-twinkle.js"></script>
+  <script src="modules/data/chapters/ch-02-graph-grove.js"></script>
+  <script src="modules/data/chapters/ch-03-picnic-pictograph.js"></script>
+  <script src="modules/data/chapters/ch-04-survey-summit.js"></script>
+  <script src="modules/data/chapters/ch-05-plot-lab.js?v=1"></script>
+  <script src="pools/math-raccoon-data-arcade-bar-burst.js?v=2"></script>
+  <script src="pools/math-raccoon-data-arcade-picto-pop.js?v=1"></script>
+  <script src="pools/math-raccoon-data-arcade-plot-party.js?v=1"></script>
+  <script src="modules/data/arcade/bar-burst.js?v=3"></script>
+  <script src="modules/data/arcade/picto-pop.js?v=2"></script>
+  <script src="modules/data/arcade/plot-party.js?v=1"></script>
+
+  <!-- Reading content -->
+  <script src="modules/reading/chapters/ch-01-arrival.js?v=2"></script>
+  <script src="modules/reading/chapters/ch-02-grammar-gate.js?v=2"></script>
+  <script src="modules/reading/chapters/ch-03-phonics-forest.js?v=2"></script>
+  <script src="modules/reading/chapters/ch-04-figurative-falls.js?v=2"></script>
+  <script src="modules/reading/chapters/ch-05-final-chapter.js?v=2"></script>
+  <script src="modules/reading/chapters/ch-06-word-workshop.js?v=1"></script>
+  <script src="pools/reading-raccoon-arcade-word-watch.js?v=1"></script>
+  <script src="pools/reading-raccoon-arcade-simile.js?v=1"></script>
+  <script src="pools/reading-raccoon-arcade-library-lookup.js?v=1"></script>
+  <script src="pools/reading-raccoon-arcade-word-builder.js?v=1"></script>
+  <script src="pools/reading-raccoon-arcade-word-sort.js?v=1"></script>
+  <script src="modules/reading/arcade/word-watch.js?v=2"></script>
+  <script src="modules/reading/arcade/simile-sprint.js?v=2"></script>
+  <script src="modules/reading/arcade/library-lookup.js?v=2"></script>
+  <script src="modules/reading/arcade/word-builder.js?v=1"></script>
+  <script src="modules/reading/arcade/word-sort.js?v=1"></script>
+
+  <!-- Admin UI (must come last so dependencies are ready) -->
+  <script src="shared/js/ui/admin.js?v=5"></script>
+
+  <script>
+    (function () {
+      // Apply persisted settings (calm-mode class, locale, etc.)
+      try { MR.Settings && MR.Settings.apply && MR.Settings.apply(); } catch (e) {}
+      // Mount the admin view.
+      if (MR.Admin && MR.Admin.render) MR.Admin.render();
+      else document.getElementById("screen").textContent = "Admin UI failed to load.";
+    })();
+  </script>
+</body>
+</html>

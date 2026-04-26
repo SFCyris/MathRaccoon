@@ -1,0 +1,837 @@
+/*!
+ * dragDrop.css — styling for interactive drag-drop widgets.
+ * Rendered by engines/dragDrop.js into question body.
+ */
+
+/* ---------- Prompt ---------- */
+.dd-prompt {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--c-ink);
+  padding: 4px 0 10px;
+  text-align: center;
+}
+
+/* ---------- Widget container ---------- */
+.dd-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 10px 6px 6px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+
+/* ---------- Tokens (draggable word / shape chips) ---------- */
+.dd-token {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  padding: 10px 14px;
+  background: #fff;
+  color: var(--c-ink);
+  border: 2.5px solid var(--c-ink-soft, #6b5b95);
+  border-radius: 14px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: grab;
+  box-shadow: 0 3px 0 rgba(107, 91, 149, 0.18);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s;
+  touch-action: none;
+}
+.dd-token:hover  { background: #f7f0ff; transform: translateY(-1px); box-shadow: 0 4px 0 rgba(107, 91, 149, 0.22); }
+.dd-token:active { cursor: grabbing; transform: translateY(1px); box-shadow: 0 2px 0 rgba(107, 91, 149, 0.18); }
+.dd-token.dd-dragging { opacity: 0.65; box-shadow: 0 8px 14px rgba(107, 91, 149, 0.35); }
+.dd-token.dd-shake {
+  animation: dd-shake 0.35s ease-in-out;
+}
+@keyframes dd-shake {
+  0%,100% { transform: translateX(0); }
+  25%     { transform: translateX(-6px); }
+  75%     { transform: translateX(6px); }
+}
+
+/* ---------- Word bank (source) ---------- */
+.dd-bank-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--c-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+.dd-bank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 14px 12px;
+  min-height: 64px;
+  background: var(--c-cream, #fff8ed);
+  border: 2.5px dashed var(--c-ink-soft, #6b5b95);
+  border-radius: 16px;
+}
+.dd-bank.dd-droptarget {
+  background: #f0e8ff;
+  border-color: var(--c-berry, #ff7a93);
+  border-style: solid;
+}
+
+/* ---------- Arrange slots (sentence row) ---------- */
+.dd-slots-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  padding: 10px 4px;
+  border-bottom: 3px solid var(--c-ink-soft, #6b5b95);
+  min-height: 68px;
+  background: linear-gradient(180deg, rgba(167,139,250,0.06), transparent);
+  border-radius: 10px 10px 0 0;
+}
+.dd-slot {
+  min-width: 64px;
+  min-height: 52px;
+  padding: 4px;
+  border: 2.5px dashed #c4b5fd;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: background 0.12s, border-color 0.12s;
+}
+.dd-slot::before {
+  content: attr(data-slot-index);
+  position: absolute;
+  top: -8px;
+  left: 4px;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  color: var(--c-ink-soft);
+  background: var(--c-cream);
+  padding: 0 6px;
+  border-radius: 999px;
+  opacity: 0.55;
+}
+.dd-slot.dd-droptarget {
+  background: #ffe5ec;
+  border-color: var(--c-berry, #ff7a93);
+  border-style: solid;
+}
+.dd-slot .dd-token {
+  box-shadow: 0 2px 0 rgba(107, 91, 149, 0.14);
+}
+
+/* ---------- Buckets (categorize) ---------- */
+.dd-buckets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  padding: 4px 2px;
+}
+.dd-bucket {
+  background: #fff;
+  border: 2.5px solid var(--c-ink-soft, #6b5b95);
+  border-radius: 14px;
+  padding: 10px 10px 14px;
+  box-shadow: 0 3px 0 rgba(107, 91, 149, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dd-bucket-label {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--c-ink);
+  padding: 4px 8px;
+  background: linear-gradient(135deg, #fff4d6, #ffe8f0);
+  border-radius: 10px;
+}
+.dd-bucket-drop {
+  min-height: 72px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-content: flex-start;
+  padding: 6px;
+  border: 2px dashed #c4b5fd;
+  border-radius: 10px;
+  background: rgba(167, 139, 250, 0.05);
+}
+.dd-bucket-drop.dd-droptarget {
+  background: #ffe5ec;
+  border-color: var(--c-berry, #ff7a93);
+  border-style: solid;
+}
+.dd-bucket .dd-token {
+  font-size: 0.95rem;
+  padding: 8px 10px;
+  min-width: 48px;
+}
+
+/* ---------- Line plot ---------- */
+.dd-lineplot {
+  gap: 10px;
+  align-items: center;
+}
+.dd-lp-count {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--c-ink);
+  font-size: 1rem;
+  text-align: center;
+}
+.dd-lp-board {
+  position: relative;
+  height: 200px;
+  margin: 0 auto;
+  background: rgba(167,139,250,0.05);
+  border-radius: 10px;
+  overflow-x: auto;
+  max-width: 100%;
+}
+.dd-lp-col {
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  padding: 0 0 28px 0;
+}
+.dd-lp-col:hover { background: rgba(255, 217, 61, 0.18); }
+.dd-lp-tick {
+  display: block;
+  width: 2px;
+  height: 8px;
+  background: var(--c-ink-soft, #6b5b95);
+  margin: 4px auto;
+}
+.dd-lp-num {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--c-ink);
+  font-size: 0.95rem;
+}
+.dd-lp-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+  align-items: center;
+  padding-bottom: 28px;
+}
+.dd-lp-x {
+  display: block;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  color: var(--c-berry, #ff7a93);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.1rem;
+  animation: dd-pop 0.16s ease-out;
+}
+@keyframes dd-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+.dd-lp-axis {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--c-ink-soft);
+}
+.dd-lp-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.dd-lp-controls button {
+  background: #fff;
+  border: 2px solid var(--c-ink-soft);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--c-ink);
+  cursor: pointer;
+}
+.dd-lp-controls button:hover { background: #fff8ed; }
+
+/* ---------- Check button ---------- */
+.answer-options-check {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}
+.answer-btn-check {
+  font-size: 1.1rem;
+  font-weight: 800;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #6ee7b7, #5ed4a8);
+  color: #1f3a2a;
+  border: 2.5px solid #1f3a2a;
+  box-shadow: 0 4px 0 rgba(31, 58, 42, 0.3);
+  min-width: 200px;
+}
+.answer-btn-check:hover {
+  transform: translateY(-1px);
+}
+.answer-btn-check.correct {
+  background: linear-gradient(135deg, #86efac, #4ade80);
+}
+.answer-btn-check.wrong {
+  background: linear-gradient(135deg, #fda4af, #fb7185);
+  color: #5b1830;
+}
+
+/* ========================================================== */
+/*  NUMBER LINE                                                 */
+/* ========================================================== */
+.dd-numberline { gap: 18px; align-items: center; }
+.dd-nl-rail {
+  position: relative;
+  width: 92%;
+  height: 72px;
+  margin: 18px auto 6px;
+}
+.dd-nl-line {
+  position: absolute;
+  top: 36px;
+  left: 0; right: 0;
+  height: 4px;
+  background: var(--c-ink-soft, #6b5b95);
+  border-radius: 3px;
+}
+.dd-nl-tick {
+  position: absolute;
+  top: 28px;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 48px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.dd-nl-mark {
+  display: block;
+  width: 2px;
+  height: 10px;
+  background: var(--c-ink-soft, #6b5b95);
+  margin: 0 auto;
+}
+.dd-nl-tick.is-major .dd-nl-mark {
+  width: 3px;
+  height: 16px;
+  background: var(--c-ink);
+}
+.dd-nl-label {
+  display: block;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--c-ink);
+  margin-top: 4px;
+}
+.dd-nl-tick:hover { background: rgba(255, 217, 61, 0.14); border-radius: 8px; }
+.dd-nl-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  padding: 6px 10px;
+  background: var(--c-sunny, #ffd93d);
+  color: var(--c-ink);
+  border: 2.5px solid var(--c-ink);
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: grab;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+  transition: transform 0.08s, box-shadow 0.08s;
+  touch-action: none;
+}
+.dd-nl-chip:active { cursor: grabbing; }
+.dd-nl-chip.dd-dragging { opacity: 0.85; box-shadow: 0 8px 14px rgba(0,0,0,0.25); }
+.dd-nl-chip.dd-nl-placed {
+  position: absolute;
+  top: -28px;
+  transform: translateX(-50%);
+  background: var(--c-mint, #6ee7b7);
+}
+.dd-nl-unit {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--c-ink-soft);
+}
+
+/* ========================================================== */
+/*  PARTITION (shape slicing)                                   */
+/* ========================================================== */
+.dd-partition { align-items: center; gap: 12px; }
+.dd-pt-shape.dd-pt-rect {
+  position: relative;
+  width: 280px;
+  height: 140px;
+  background: #fff;
+  border: 3px solid var(--c-ink);
+  border-radius: 12px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.dd-pt-rect .dd-pt-part {
+  position: absolute;
+  top: 0; bottom: 0;
+  background: transparent;
+  border: none;
+  border-right: 2px dashed var(--c-ink-soft, #6b5b95);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.14s;
+}
+.dd-pt-rect .dd-pt-part:last-child { border-right: none; }
+.dd-pt-rect .dd-pt-part:hover { background: rgba(167, 139, 250, 0.15); }
+.dd-pt-rect .dd-pt-part.dd-pt-shaded {
+  background: var(--c-berry, #ff7a93);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255,255,255,0.25) 0 6px,
+    transparent 6px 12px
+  );
+}
+.dd-pt-shape.dd-pt-circle {
+  width: 180px;
+  height: 180px;
+  display: block;
+  margin: 0 auto;
+}
+.dd-pt-wedge {
+  fill: #fff;
+  stroke: var(--c-ink);
+  stroke-width: 2;
+  cursor: pointer;
+  transition: fill 0.14s;
+}
+.dd-pt-wedge:hover { fill: rgba(167,139,250,0.25); }
+.dd-pt-wedge.dd-pt-shaded { fill: var(--c-berry, #ff7a93); }
+.dd-pt-bar {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.dd-pt-counter {
+  color: var(--c-ink);
+  background: var(--c-cream, #fff8ed);
+  border: 2px solid var(--c-ink-soft);
+  border-radius: 10px;
+  padding: 4px 10px;
+}
+.dd-pt-n { color: var(--c-berry, #ff7a93); font-weight: 900; }
+.dd-pt-clear {
+  background: #fff;
+  border: 2px solid var(--c-ink-soft);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  cursor: pointer;
+}
+.dd-pt-clear:hover { background: #fff8ed; }
+
+/* ========================================================== */
+/*  BALANCE (equation slots)                                    */
+/* ========================================================== */
+.dd-balance .dd-bal-eq {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  padding: 14px 10px;
+  background: linear-gradient(135deg, #fff4d6, #ffe8f0);
+  border: 2.5px solid var(--c-ink);
+  border-radius: 14px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--c-ink);
+}
+.dd-bal-txt {
+  padding: 0 2px;
+  white-space: nowrap;
+}
+.dd-bal-equals {
+  font-size: 1.5rem;
+  color: var(--c-berry);
+  padding: 0 6px;
+}
+.dd-bal-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.dd-slot-bal {
+  min-width: 52px;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2.5px dashed var(--c-berry, #ff7a93);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.7);
+  padding: 3px;
+}
+.dd-slot-bal.dd-droptarget {
+  background: #ffe5ec;
+  border-style: solid;
+}
+.dd-bal-num {
+  min-width: 44px;
+  padding: 8px 12px;
+  font-size: 1.1rem;
+}
+
+/* ========================================================== */
+/*  DIGIT TILES (place-value grid)                              */
+/* ========================================================== */
+.dd-dt-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 6px 2px;
+}
+.dd-dt-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 84px;
+}
+.dd-dt-col-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--c-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.dd-slot-digit {
+  min-width: 76px;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 3px dashed var(--c-ink-soft, #6b5b95);
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.6rem;
+  color: var(--c-ink);
+}
+.dd-slot-digit.dd-droptarget {
+  background: #ffe5ec;
+  border-color: var(--c-berry, #ff7a93);
+  border-style: solid;
+}
+.dd-dt-digit {
+  min-width: 48px;
+  padding: 12px 10px;
+  font-size: 1.3rem;
+  background: var(--c-sky, #bbe8f2);
+}
+
+/* ========================================================== */
+/*  RULER                                                       */
+/* ========================================================== */
+.dd-ruler { align-items: center; gap: 16px; }
+.dd-ru-object {
+  position: relative;
+  width: 92%;
+  height: 36px;
+  margin: 0 auto;
+  background: rgba(167, 139, 250, 0.05);
+  border-radius: 6px;
+}
+.dd-ru-bar {
+  position: absolute;
+  top: 10px;
+  height: 16px;
+  background: linear-gradient(135deg, var(--c-mint, #6ee7b7), #5ed4a8);
+  border: 2px solid var(--c-ink);
+  border-radius: 8px;
+}
+.dd-ru-ruler {
+  position: relative;
+  width: 92%;
+  height: 72px;
+  margin: 0 auto;
+  background: var(--c-cream, #fff8ed);
+  border: 2.5px solid var(--c-ink);
+  border-radius: 10px 10px 4px 4px;
+}
+.dd-ru-tick {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 14px;
+  background: var(--c-ink-soft, #6b5b95);
+  transform: translateX(-50%);
+}
+.dd-ru-tick.is-major {
+  height: 22px;
+  width: 3px;
+  background: var(--c-ink);
+}
+.dd-ru-num {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--c-ink);
+}
+.dd-ru-marker-start {
+  position: absolute;
+  top: 44px;
+  transform: translate(-50%, 0);
+  color: var(--c-ink-soft);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.dd-ru-marker-end {
+  position: absolute;
+  top: 44px;
+  transform: translate(-50%, 0);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: grab;
+  background: transparent;
+  border: none;
+  user-select: none;
+  touch-action: none;
+  transition: transform 0.08s;
+}
+.dd-ru-marker-end:active { cursor: grabbing; }
+.dd-ru-marker-end.dd-dragging { transform: translate(-50%, -4px) scale(1.15); }
+.dd-ru-readout {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--c-ink);
+}
+.dd-ru-readout strong {
+  font-family: var(--font-display);
+  font-weight: 900;
+  color: var(--c-berry, #ff7a93);
+  padding: 0 6px;
+  font-size: 1.2rem;
+}
+
+/* ========================================================== */
+/*  SHAPE COMPOSE                                               */
+/* ========================================================== */
+.dd-shapecompose { align-items: center; gap: 12px; }
+.dd-sc-grid {
+  display: grid;
+  gap: 2px;
+  padding: 4px;
+  background: var(--c-ink);
+  border-radius: 6px;
+  margin: 0 auto;
+}
+.dd-sc-cell {
+  aspect-ratio: 1 / 1;
+  min-width: 44px;
+  max-width: 60px;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.dd-sc-cell:hover { background: rgba(167, 139, 250, 0.2); }
+.dd-sc-cell.is-filled {
+  background: linear-gradient(135deg, var(--c-mint, #6ee7b7), #5ed4a8);
+}
+.dd-sc-bar {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.dd-sc-counter {
+  color: var(--c-ink);
+  background: var(--c-cream, #fff8ed);
+  border: 2px solid var(--c-ink-soft);
+  border-radius: 10px;
+  padding: 4px 10px;
+}
+.dd-sc-n { color: var(--c-berry, #ff7a93); font-weight: 900; }
+.dd-sc-clear {
+  background: #fff;
+  border: 2px solid var(--c-ink-soft);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ========================================================== */
+/*  BAR GRAPH                                                   */
+/* ========================================================== */
+.dd-bargraph { align-items: center; gap: 10px; }
+.dd-bg-unit {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--c-ink-soft);
+  font-size: 0.85rem;
+}
+.dd-bg-board {
+  position: relative;
+  width: 95%;
+  height: 240px;
+  margin: 0 auto;
+  background: rgba(167, 139, 250, 0.05);
+  border-left: 3px solid var(--c-ink);
+  border-bottom: 3px solid var(--c-ink);
+  border-radius: 0 0 0 6px;
+}
+.dd-bg-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.dd-bg-gridline {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: rgba(107, 91, 149, 0.15);
+}
+.dd-bg-gridline span {
+  position: absolute;
+  left: -26px;
+  top: -8px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--c-ink-soft);
+  font-weight: 700;
+}
+.dd-bg-cols {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  padding: 0 10px;
+}
+.dd-bg-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+  position: relative;
+}
+.dd-bg-col:hover .dd-bg-stack { box-shadow: 0 0 0 3px rgba(255, 217, 61, 0.5); }
+.dd-bg-stack {
+  width: 60%;
+  max-width: 60px;
+  height: 0%;
+  background: linear-gradient(180deg, var(--c-berry, #ff7a93), #e55a7b);
+  border: 2px solid var(--c-ink);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  transition: height 0.18s ease-out;
+  display: flex;
+  flex-direction: column-reverse;
+}
+.dd-bg-unit-brick {
+  display: block;
+  flex: 1;
+  min-height: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+.dd-bg-label {
+  position: absolute;
+  bottom: -24px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--c-ink);
+  font-size: 0.9rem;
+  padding-top: 4px;
+}
+.dd-bg-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 28px;
+}
+.dd-bg-controls button {
+  background: #fff;
+  border: 2px solid var(--c-ink-soft);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---------- Reveal panel (shown after wrong answer) ---------- */
+.dd-reveal {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--c-cream, #fff8ed);
+  border: 2px solid var(--c-berry, #ff7a93);
+  border-radius: 12px;
+  font-family: var(--font-body, 'Nunito', sans-serif);
+  font-size: 0.95rem;
+  color: var(--c-ink);
+  line-height: 1.5;
+}
+.dd-reveal strong {
+  font-family: var(--font-display);
+  color: var(--c-berry, #ff7a93);
+}
+.dd-reveal > div { margin: 3px 0; }

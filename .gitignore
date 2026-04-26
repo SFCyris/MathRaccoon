@@ -1,0 +1,11 @@
+# Internal planning docs — not for publication
+SPEC.md
+
+# Screenshot helper — seeds localStorage with a demo profile, dev-only
+_screenshot-seed.html
+
+# OS / editor junk
+.DS_Store
+
+# Local Claude Code state
+.claude/
