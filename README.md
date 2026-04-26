@@ -67,15 +67,9 @@ The Parent Admin dashboard: at-a-glance progress, then tabs for Settings, Games 
 
 ## Audio
 
-The **🎵 Music** toggle in the top bar runs a small procedural lofi study-beat generated entirely in the browser via the Web Audio API — no audio files in the repo, nothing to download. You'll hear:
+The **🎵 Music** toggle in the top bar runs a small procedural lofi study-beat generated entirely in the browser via the Web Audio API — no audio files in the repo, nothing to download. 
 
-- A boom-bap rhythm (light snare on 2 & 4, hi-hats on every 8th, plus a soft pickup hat on the "and" of beat 4)
-- A walking saw bass following the chord roots
-- A light electric-piano comp playing rootless 7th voicings: **Cmaj7 → Am7 → Fmaj7 → G7**
-- A jazzy lead picked from a small library of phrase templates (descending sparkles, ascending lifts, bebop runs, blues licks) — the lead never repeats the exact same phrase twice
-- A subtle vinyl crackle bed for warmth
-
-Tempo sits at 72 BPM, calmly. If you ever want a real recorded loop instead, drop an `mp3` into `assets/audio/` and call `MR.Audio.setMusicSrc("…")` during boot — it takes priority over the procedural fallback.
+If you ever want a real recorded loop instead, drop an `mp3` into `assets/audio/` and call `MR.Audio.setMusicSrc("…")` during boot — it takes priority over the procedural fallback.
 
 ## Quick start
 
