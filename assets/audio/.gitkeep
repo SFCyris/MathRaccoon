@@ -1,0 +1,16 @@
+# Drop your music files here.
+#
+# To replace the procedural lofi background with a real recording:
+#   1. Place an mp3, ogg, or m4a in this folder (e.g. loop.mp3).
+#   2. In your boot script (or via the browser console for testing) call:
+#        MR.Audio.setMusicSrc("assets/audio/loop.mp3");
+#      BEFORE the user toggles the 🎵 Music button. After that, clicking
+#      Music plays your file (looped) instead of the procedural fallback.
+#
+# Suggested sources:
+#   - freesound.org (search "lofi loop", filter to Creative Commons)
+#   - YouTube Audio Library  → Free no-attribution loops
+#   - Pixabay / Mixkit       → CC0 / royalty-free
+#
+# Aim for a 30-90 second seamless loop; the <audio> element handles the
+# repeat. ~120 KB at 96 kbps is plenty for a calm pad.
