@@ -1,4 +1,4 @@
-# Math Raccoon (3rd Grade Level)
+# Math Raccoon
 
 A gentle, offline-friendly learning app for kids. Four math books — Arithmetic, Measurement, Geometry, Data — plus a Reading Raccoon module for vocabulary, grammar, phonics, figurative language, and comprehension. Each module has story chapters, arcade games, and a Teaching Corner. No ads. No tracking. No accounts.
 
