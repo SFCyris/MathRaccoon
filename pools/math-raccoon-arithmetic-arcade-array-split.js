@@ -34,7 +34,7 @@ MR.Pools.register({
       "rightTemplate": "(6 × __) + (6 × __)",
       "answer": ["5", "4"],
       "bank": ["2", "3", "4", "5", "6", "7"],
-      "hint": "9 = 5 + 4. Use what you know (6×5=30) plus (6×4=24)." },
+      "hint": "5 + 4 = 9. Use what you know: 6×5=30, 6×4=24." },
 
     { "kind": "balance",
       "prompt": "Fill in the split for 4 × 7.",

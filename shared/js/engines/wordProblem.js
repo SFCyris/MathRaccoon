@@ -303,6 +303,10 @@
       options,
       suffix: q.suffix || "",
       _hint: q.hint || "",
+      // Preserve the viz spec so renderVisual() can show a per-question
+      // visualization. Without this passthrough, the pool's viz field
+      // would be silently dropped at round-build time.
+      viz: q.viz || null,
     };
   }
 
@@ -326,6 +330,24 @@
   }
 
   function renderVisual(p) {
+    // Render an explicit viz when the pool item authors one — this is the
+    // only path that adds pedagogical value. Earlier iterations had a
+    // "fallback" that auto-built a storyProblem viz from any emoji in the
+    // prompt, but the result was noise: a decorative emoji + abstract
+    // operation chips that didn't show THIS question's quantities or
+    // relationships. The user correctly called that out — a viz must be ON
+    // TARGET for the specific question (15¢ + 20¢ → barModel of those two
+    // amounts; jug at half full → capacityJug; not a generic coin emoji).
+    //
+    // Items without an explicit viz fall back to the thought-bubble, which
+    // honestly signals "no on-target visualization, take a moment to read"
+    // rather than pretending to teach with irrelevant chrome.
+    if (p && p.viz && window.MR && window.MR.Viz && window.MR.Viz.render) {
+      const node = window.MR.Viz.render(p.viz);
+      if (node) {
+        return `<div class="wp-visual wp-visual-viz" aria-hidden="true">${node.outerHTML}</div>`;
+      }
+    }
     return `
       <div class="wp-visual" aria-hidden="true">
         <div class="wp-emoji">💭</div>
@@ -338,9 +360,14 @@
     return HINTS[p.topic] || "Read slowly — what is the story asking?";
   }
 
+  // formatOption delegates to MR.AnswerChips so wordProblem and teach lessons
+  // share the exact same chip rendering. See shared/js/viz/answerChips.js.
   function formatOption(opt, p) {
+    if (window.MR && window.MR.AnswerChips && window.MR.AnswerChips.format) {
+      return window.MR.AnswerChips.format(opt, p);
+    }
+    // Fallback if chips module didn't load — plain text only.
     const suf = p && p.suffix ? p.suffix : "";
-    // $ is a prefix unit ($18), others suffix (18¢, 18 cm, 18 min, 18 mL).
     if (suf === "$") return `$${opt}`;
     return suf ? `${opt} ${suf}` : `${opt}`;
   }

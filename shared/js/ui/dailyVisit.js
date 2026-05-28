@@ -16,6 +16,13 @@
     return (s.playerName || "friend").trim() || "friend";
   }
 
+  // playerName is user-supplied; escape before going through innerHTML.
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
   // Pick a friendly, easy one-shot problem. Falls through to arithmetic add
   // if a chosen engine throws, so the popup never crashes the hub.
   function pickProblem() {
@@ -82,9 +89,10 @@
       ? window.MR.Raccoon.render("cheer", { size: 110 })
       : "🦝";
 
+    const safeName = escapeHtml(name);
     const greet = streak > 1
-      ? `${streak}-day streak, ${name}! 🔥`
-      : `Hi, ${name}! Nice to see you.`;
+      ? `${streak}-day streak, ${safeName}! 🔥`
+      : `Hi, ${safeName}! Nice to see you.`;
 
     const overlay = document.createElement("div");
     overlay.className = "daily-overlay";

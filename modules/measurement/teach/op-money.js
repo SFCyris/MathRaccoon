@@ -40,12 +40,14 @@
         practice: [
           {
             prompt: "Which coin is worth 10¢?",
+            viz: { type: "coinSet", params: { coins: ["penny", "nickel", "dime"], label: "Penny · Nickel · Dime" } },
             options: ["penny", "nickel", "dime"],
             answer: "dime",
             hint: "The smallest silver coin — but don't judge by size!",
           },
           {
             prompt: "Which coin is worth 25¢?",
+            viz: { type: "coinSet", params: { coins: ["nickel", "dime", "quarter"], label: "Nickel · Dime · Quarter" } },
             options: ["nickel", "dime", "quarter"],
             answer: "quarter",
           },
@@ -85,11 +87,11 @@
             hint: "Quarters first: 25 + 25 = 50. Then add 10.",
           },
           {
-            prompt: "Count: 1 quarter, 1 nickel, 3 pennies.",
-            viz: { type: "coinSet", params: { coins: ["quarter", "nickel", "penny", "penny", "penny"] } },
+            prompt: "Tap coins to build 33¢. Then pick the total.",
+            viz: { type: "interactiveCoinPile", params: { targetCents: 33, label: "Tap a coin in the bank to add it. Tap a coin in your pile to remove it." } },
             options: ["28¢", "30¢", "33¢"],
             answer: "33¢",
-            hint: "25 + 5 + 1 + 1 + 1 = 33.",
+            hint: "Start with a quarter (25¢). Then add a nickel (5¢). Then add pennies one at a time.",
           },
         ],
       },
@@ -120,15 +122,17 @@
         practice: [
           {
             prompt: "Toy costs 70¢. You pay $1 (100¢). Change?",
+            viz: { type: "coinSet", params: { coins: [], label: "From 70¢ to 100¢ — which coins fill the gap?" } },
             options: ["20¢", "30¢", "40¢"],
             answer: "30¢",
             hint: "Count up from 70 to 100: that's 30.",
           },
           {
             prompt: "Snack is 85¢. You pay 1 dollar. Change?",
+            viz: { type: "coinSet", params: { coins: [], label: "From 85¢ to 100¢ — which coins fill the gap?" } },
             options: ["5¢", "10¢", "15¢"],
             answer: "15¢",
-            hint: "85 → 90 → 100. A nickel then a dime = 15¢.",
+            hint: "Count up from 85¢ to 100¢. Which coins fill the gap?",
           },
         ],
       },

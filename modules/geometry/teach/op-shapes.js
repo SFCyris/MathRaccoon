@@ -23,27 +23,47 @@
             { kind: "pentagon", name: "Pentagon · 5" },
             { kind: "hexagon", name: "Hexagon · 6" },
           ] } },
-          caption: "Tri = 3. Quad = 4. Penta = 5. Hexa = 6."
+          caption: "Tri: 3 sides. Quad: 4. Penta: 5. Hexa: 6."
         },
         watchMe: [
           { text: "Let's look at a triangle. How many sides?",
             viz: { type: "shapeGrid", params: { shapes: [{ kind: "triangle", name: "3 sides" }] } } },
           { text: "Three sides. The name tri-angle means three angles.",
-            equation: "Triangle = 3 sides" },
+            equation: "Triangle: 3 sides" },
           { text: "A pentagon has 5 sides.",
             viz: { type: "shapeGrid", params: { shapes: [{ kind: "pentagon", name: "5 sides" }] } } },
+          { text: "Reverse: if a shape has 6 sides, what's its name? Look at the prefix.",
+            viz: { type: "shapeGrid", params: { shapes: [{ kind: "hexagon", name: "6 sides → hexagon" }] } } },
+          { text: "Detective: count the sides on each shape. Match the name to the count.",
+            viz: { type: "shapeGrid", params: { shapes: [
+              { kind: "triangle", name: "Tri-" },
+              { kind: "square", name: "Quad-" },
+              { kind: "pentagon", name: "Penta-" },
+              { kind: "hexagon", name: "Hexa-" },
+            ] } } },
         ],
         practice: [
           {
             prompt: "Which shape has 6 sides?",
+            viz: { type: "shapeGrid", params: { shapes: [
+              { kind: "triangle", name: "?" }, { kind: "pentagon", name: "?" }, { kind: "hexagon", name: "?" }
+            ] } },
             options: ["triangle", "pentagon", "hexagon"],
             answer: "hexagon",
           },
           {
             prompt: "A shape with 4 straight sides is a…",
+            viz: { type: "shapeGrid", params: { shapes: [{ kind: "square", name: "4 sides" }] } },
             options: ["triangle", "quadrilateral", "pentagon"],
             answer: "quadrilateral",
             hint: "Quad = 4."
+          },
+          {
+            prompt: "Reverse: this shape has 5 sides. What's its name?",
+            viz: { type: "shapeGrid", params: { shapes: [{ kind: "pentagon", name: "?" }] } },
+            options: ["pentagon", "hexagon", "square"],
+            answer: "pentagon",
+            hint: "Penta = 5 → pentagon.",
           },
         ],
       },
@@ -72,13 +92,16 @@
         practice: [
           {
             prompt: "Which shape has 4 equal sides AND 4 right angles?",
+            viz: { type: "shapeGrid", params: { shapes: [{ kind: "square", name: "Equal sides + right angles" }] } },
             options: ["rectangle", "square", "trapezoid"],
             answer: "square",
           },
           {
-            prompt: "A shape with only one pair of parallel sides is a…",
+            prompt: "A shape with only one pair of parallel sides (sides that run the same direction, like train tracks) is a…",
+            viz: { type: "shapeGrid", params: { shapes: [{ kind: "trapezoid", name: "1 pair parallel" }] } },
             options: ["rhombus", "trapezoid", "rectangle"],
             answer: "trapezoid",
+            hint: "Parallel = lines that never meet. A trapezoid has just one pair like that.",
           },
         ],
       },

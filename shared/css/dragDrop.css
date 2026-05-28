@@ -130,6 +130,102 @@
   box-shadow: 0 2px 0 rgba(107, 91, 149, 0.14);
 }
 
+/* ---------- functionTable (machine + IN/OUT table with drop slots) ----------
+   Mirrors the Teach lesson's `functionTable` viz so a child sees the same
+   picture in Learn and in Arcade. The machine on the left declares the RULE
+   (yellow); the table on the right shows IN (blue) and OUT (green) cells,
+   with missing values rendered as coral-bordered drop slots. */
+.dd-functiontable {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 2px;
+}
+.dd-ft-stage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+}
+.dd-ft-machine {
+  flex: 0 1 240px;
+  max-width: 100%;
+}
+.dd-ft-machine-svg { width: 100%; height: auto; max-width: 240px; }
+.dd-ft-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #fff;
+  border: 2.5px solid var(--c-ink-soft, #6b5b95);
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 200px;
+}
+.dd-ft-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  align-items: stretch;
+}
+.dd-ft-header { margin-bottom: 4px; }
+.dd-ft-head {
+  text-align: center;
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--c-ink, #3a2e5f);
+  padding: 6px 10px;
+  background: #fff;
+  border: 2px solid var(--c-ink-soft, #6b5b95);
+  border-radius: 8px;
+}
+.dd-ft-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 6px 12px;
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--c-ink, #3a2e5f);
+  background: var(--ft-cell, #fff);
+  border: 2px solid var(--c-ink-soft, #6b5b95);
+  border-radius: 8px;
+}
+/* Drop slots in the table cells. Coral dashed border = "this is what
+   you're solving for", consistent with the UNKNOWN colour language. */
+.dd-slot-ft {
+  min-height: 48px;
+  min-width: 64px;
+  border: 2.5px dashed #ff7a93;
+  background: rgba(255, 122, 147, 0.08);
+  border-radius: 8px;
+}
+.dd-slot-ft::before {
+  /* Hide the generic "0/1/2" index chip — it's noise in a math table.
+     The cell's position in the table communicates which row it belongs to. */
+  display: none;
+}
+.dd-slot-ft.dd-droptarget {
+  background: #ffe5ec;
+  border-style: solid;
+  border-color: #ff7a93;
+}
+.dd-slot-ft .dd-token {
+  /* Once a token lands in a function-table slot, paint it like a known cell
+     so the table reads as "complete" — no more coral, no more dashed border. */
+  background: #6ee7b7;
+  border-color: #6b5b95;
+  color: #3a2e5f;
+}
+.dd-slot-ft-in .dd-token {
+  /* If the drop slot is in the IN column, the placed token should read blue. */
+  background: #7dd3fc;
+}
+
 /* ---------- Buckets (categorize) ---------- */
 .dd-buckets {
   display: grid;
@@ -770,8 +866,21 @@
   cursor: pointer;
   padding: 0 4px;
   position: relative;
+  /* The whole column is now clickable — click at any height to SET the bar
+     to that integer value. The hover background is a subtle "this is
+     interactive" cue without competing with the bar visual itself. */
+  transition: background 0.12s ease;
 }
-.dd-bg-col:hover .dd-bg-stack { box-shadow: 0 0 0 3px rgba(255, 217, 61, 0.5); }
+.dd-bg-col:hover {
+  background: rgba(167, 139, 250, 0.07);
+  border-radius: 4px;
+}
+.dd-bg-col:focus-visible {
+  outline: 3px solid var(--c-berry, #ff7a93);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+body.calm-mode .dd-bg-col { transition: none !important; }
 .dd-bg-stack {
   width: 60%;
   max-width: 60px;
@@ -806,7 +915,7 @@
   display: flex;
   gap: 10px;
   justify-content: center;
-  margin-top: 28px;
+  margin-top: 16px;
 }
 .dd-bg-controls button {
   background: #fff;
@@ -816,6 +925,89 @@
   font-family: var(--font-display);
   font-weight: 700;
   cursor: pointer;
+}
+
+/* ---------- Per-bar +/- steppers (UX rebuild) ----------
+   The steppers row mirrors the board's exact layout (95% width, centered,
+   `padding: 0 10px`, `flex: 1` per column) so each stepper sits directly
+   under its bar column above. Buttons are 40×40+ to meet the touch-target
+   floor for fine-motor / autism-spectrum users.
+
+   Structure:
+     .dd-bg-steppers           ← row container, matches board footprint
+       .dd-bg-stepper-col      ← column slot (flex: 1, matches .dd-bg-col)
+         .dd-bg-stepper        ← visible rounded box, centered in slot
+           − [value] +
+*/
+.dd-bg-steppers {
+  width: 95%;
+  margin: 36px auto 0;            /* 36px top gap so labels clear the bars */
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 10px;                /* exact match for .dd-bg-cols padding */
+}
+.dd-bg-stepper-col {
+  flex: 1;                        /* equal share — same as .dd-bg-col */
+  display: flex;
+  justify-content: center;        /* center the inner box within the slot */
+  padding: 0 4px;                 /* same per-column padding as .dd-bg-col */
+}
+.dd-bg-stepper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #fff;
+  border: 2px solid var(--c-ink-soft, #6b5b95);
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 2px 0 rgba(107, 91, 149, 0.12);
+}
+.dd-bg-minus,
+.dd-bg-plus {
+  min-width: 40px;
+  min-height: 40px;
+  border: none;
+  background: var(--c-lilac, #c4b5fd);
+  color: var(--c-ink, #3a2e5f);
+  border-radius: 10px;
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-weight: 800;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.15s ease, color 0.15s ease;
+}
+.dd-bg-plus  { background: #d9f5e4; color: #1a7a4a; }
+.dd-bg-minus { background: #fde2e9; color: #a3344f; }
+.dd-bg-minus:hover,
+.dd-bg-plus:hover { transform: scale(1.06); }
+.dd-bg-minus:active,
+.dd-bg-plus:active { transform: scale(0.94); }
+/* Visible focus ring for keyboard nav */
+.dd-bg-minus:focus-visible,
+.dd-bg-plus:focus-visible {
+  outline: 3px solid var(--c-berry, #ff7a93);
+  outline-offset: 2px;
+}
+.dd-bg-value {
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--c-ink, #3a2e5f);
+  min-width: 28px;
+  text-align: center;
+}
+body.calm-mode .dd-bg-minus,
+body.calm-mode .dd-bg-plus {
+  transition: none !important;
+}
+body.calm-mode .dd-bg-minus:hover,
+body.calm-mode .dd-bg-plus:hover,
+body.calm-mode .dd-bg-minus:active,
+body.calm-mode .dd-bg-plus:active {
+  transform: none !important;
 }
 
 /* ---------- Reveal panel (shown after wrong answer) ---------- */

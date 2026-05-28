@@ -62,7 +62,7 @@
         watchMe: [
           { text: "We want 9 + 4.",
             viz: { type: "twoTenFrames", params: { a: 9, b: 4, aLabel: "9", bLabel: "4" } } },
-          { text: "Borrow 1 from the 4 to fill the ten.",
+          { text: "Move 1 from the 4 over to fill the ten.",
             viz: { type: "twoTenFrames", params: { a: 10, b: 3, aLabel: "10", bLabel: "3" } } },
           { text: "Now it's 10 + 3 = 13. That's easy! So 9 + 4 = 13.",
             equation: "9 + 4 = 10 + 3 = 13",
@@ -81,7 +81,7 @@
             viz: { type: "twoTenFrames", params: { a: 7, b: 5, aLabel: "7", bLabel: "5" } },
             options: [11, 12, 13],
             answer: 12,
-            hint: "Borrow 3 to fill ten, then 10 + 2 = 12."
+            hint: "Move 3 over to fill ten, then 10 + 2 = 12."
           },
         ],
       },
@@ -106,12 +106,14 @@
         practice: [
           {
             prompt: "What's 5 + 6?",
+            viz: { type: "barModel", params: { parts: [{ value: 5, label: "5" }, { value: 6, label: "6" }] } },
             options: [10, 11, 12],
             answer: 11,
             hint: "5 + 5 = 10. Add one more."
           },
           {
             prompt: "What's 7 + 8?",
+            viz: { type: "barModel", params: { parts: [{ value: 7, label: "7" }, { value: 8, label: "8" }] } },
             options: [14, 15, 16],
             answer: 15,
             hint: "7 + 7 = 14. Eight is one more."

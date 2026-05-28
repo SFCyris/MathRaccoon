@@ -72,7 +72,7 @@ MR.Pools.register({
       "prompt": "Mouse counted nuts per day: 2, 3, 4, 4, 5, 5, 5, 6 nuts.",
       "scale": { "min": 1, "max": 7, "step": 1, "unit": "nuts" },
       "marks": [2, 3, 4, 4, 5, 5, 5, 6],
-      "hint":  "8 X's total. Three at 5 is the mode." },
+      "hint":  "8 X's total. Three at 5 is the most common." },
 
     { "kind": "linePlot",
       "prompt": "Bird nests with eggs: 1, 2, 2, 3, 3, 4.",
@@ -102,7 +102,7 @@ MR.Pools.register({
       "prompt": "Hiking distances: 2, 3, 3, 4, 4, 4, 5 miles.",
       "scale": { "min": 1, "max": 6, "step": 1, "unit": "miles" },
       "marks": [2, 3, 3, 4, 4, 4, 5],
-      "hint":  "7 X's total. Mode is 4 (three hikes)." },
+      "hint":  "7 X's total. Tallest stack is at 4 (three hikes)." },
 
     { "kind": "linePlot",
       "prompt": "Baby teeth at the clinic: 4, 5, 5, 6, 6, 6, 7.",
@@ -114,7 +114,7 @@ MR.Pools.register({
       "prompt": "Library books checked out: 1, 2, 2, 2, 3, 3, 4, 4.",
       "scale": { "min": 0, "max": 5, "step": 1, "unit": "books" },
       "marks": [1, 2, 2, 2, 3, 3, 4, 4],
-      "hint":  "8 X's. Three X's at 2 is the mode." },
+      "hint":  "8 X's. Three X's at 2 is the most common." },
 
     { "kind": "linePlot",
       "prompt": "Pumpkin weights: 6, 8, 8, 10, 10, 10, 12 lbs.",
@@ -132,7 +132,7 @@ MR.Pools.register({
       "prompt": "Snowfall per day: 0, 1, 1, 2, 2, 3, 3, 3.",
       "scale": { "min": 0, "max": 4, "step": 1, "unit": "in" },
       "marks": [0, 1, 1, 2, 2, 3, 3, 3],
-      "hint":  "8 X's total. Mode is 3 inches." },
+      "hint":  "8 X's total. Tallest stack is at 3 inches." },
 
     { "kind": "linePlot",
       "prompt": "Pencil lengths: 5, 6, 6, 7, 7, 7, 8 cm.",
@@ -144,7 +144,7 @@ MR.Pools.register({
       "prompt": "Birdbath visits per hour: 1, 2, 2, 3, 3, 3, 4, 5.",
       "scale": { "min": 0, "max": 6, "step": 1, "unit": "birds" },
       "marks": [1, 2, 2, 3, 3, 3, 4, 5],
-      "hint":  "8 X's total. Mode is 3." },
+      "hint":  "8 X's total. Tallest stack is at 3." },
 
     { "kind": "linePlot",
       "prompt": "Lost marbles counted: 1, 1, 2, 2, 2, 2, 3.",

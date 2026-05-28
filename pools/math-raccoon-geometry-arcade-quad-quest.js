@@ -150,7 +150,7 @@ MR.Pools.register({
         { "text": "Rhombus",       "bucket": "4" },
         { "text": "Honeycomb cell","bucket": "6" }
       ],
-      "hint": "Tri=3, quad=4, penta=5, hexa=6." },
+      "hint": "Tri: 3 sides, quad: 4, penta: 5, hexa: 6." },
 
     { "kind": "categorize",
       "prompt": "Open or closed shapes?",

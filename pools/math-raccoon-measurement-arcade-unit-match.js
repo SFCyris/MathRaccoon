@@ -186,7 +186,7 @@ MR.Pools.register({
         { "text": "kilometer",  "bucket": "length" },
         { "text": "hour",       "bucket": "time"   }
       ],
-      "hint": "Length = distance. Mass = weight. Volume = liquid. Time = clock." },
+      "hint": "Length: distance. Mass: weight. Volume: liquid. Time: clock." },
 
     { "kind": "categorize",
       "prompt": "Is each amount MORE or LESS than 1 kilogram?",

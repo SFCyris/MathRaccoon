@@ -9,6 +9,16 @@
   const R = window.MR.Router;
   const T = (k, v) => window.MR.Strings.t(k, v);
 
+  // Escape user-controlled strings before injecting into innerHTML.
+  // The only field that ever flows in from the kid (or parent) typing is
+  // playerName, but defense in depth here keeps anything else accidentally
+  // routed through innerHTML from becoming an XSS surface.
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
   function mount(node) {
     const app = document.getElementById("app");
     const screen = document.getElementById("screen");
@@ -36,7 +46,7 @@
     greetCard.innerHTML = `
       <div class="greet-raccoon">${raccoonSvg}</div>
       <div class="greet-bubble">
-        ${greet.emoji} <strong>${greet.phrase}, <span class="greet-name">${name}</span>!</strong>
+        ${greet.emoji} <strong>${greet.phrase}, <span class="greet-name">${escapeHtml(name)}</span>!</strong>
         I'm Math Raccoon. Pick a book and let's have fun learning together! 💜
       </div>`;
 

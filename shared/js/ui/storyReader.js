@@ -29,10 +29,13 @@
       : (isOutro ? "Chapter complete!" : "Chapter");
     const title = cleanTitle(chapter && chapter.title);
 
+    // NOTE: do NOT autoplay every line's audio at render time — when several
+    // lines had audio, they all played at once and overlapped into noise. The
+    // per-line audio data stays on the DOM (so a future tap-to-play can read
+    // it) but we only schedule playback when the kid actually taps a line.
     const body = (lines || []).map((ln) => {
       const speaker = (ln.speaker || "narrator").toLowerCase();
       const text = interpolate(ln.text || "", vars);
-      if (ln.audio) A.playLine({ audio: ln.audio });
       if (speaker === "narrator") {
         return h("p", { class: "narrative-body narrator" }, text);
       }

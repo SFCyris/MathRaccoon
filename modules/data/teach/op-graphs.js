@@ -82,6 +82,53 @@
           },
         ],
       },
+      {
+        id: "reverse-graph",
+        title: "Reverse — Numbers Into a Graph",
+        subtitle: "Match the data to the picture.",
+        emoji: "🔍",
+        idea: {
+          hook: "Reading a graph is forward. Going from numbers TO the graph is reverse. Which set of counts could have made this picture?",
+          viz: { type: "barChart", params: { bars: [
+            { label: "🐰", value: 6 }, { label: "🦊", value: 3 }, { label: "🦝", value: 5 },
+          ], label: "Which counts match?" } },
+          caption: "Bunny tallest (6). Fox shortest (3). Raccoon in the middle (5).",
+        },
+        watchMe: [
+          { text: "Here's a graph. Now I'll tell you the counts and you check.",
+            viz: { type: "barChart", params: { bars: [
+              { label: "A", value: 4 }, { label: "B", value: 7 }, { label: "C", value: 2 },
+            ] } } },
+          { text: "I say: A=4, B=7, C=2. The B bar should be the tallest. C should be shortest. ✓",
+            equation: "B (7) > A (4) > C (2)" },
+          { text: "Detective: which set of counts matches this graph?",
+            viz: { type: "barChart", params: { bars: [
+              { label: "🍎", value: 5 }, { label: "🍌", value: 2 }, { label: "🍇", value: 8 },
+            ] } } },
+          { text: "Grapes is tallest (8). Banana is shortest (2). Apple is in between (5).",
+            equation: "🍎 5 · 🍌 2 · 🍇 8" },
+        ],
+        practice: [
+          { prompt: "A graph shows 🐶: 3 and 🐱: 5. Which bar is TALLER?",
+            viz: { type: "barChart", params: { bars: [
+              { label: "🐶", value: 3 }, { label: "🐱", value: 5 },
+            ] } },
+            options: ["🐶", "🐱", "equal"], answer: "🐱",
+            hint: "5 > 3 — cat bar is taller." },
+          { prompt: "Which counts could make this graph: tallest: 7, middle: 4, shortest: 2?",
+            viz: { type: "barChart", params: { bars: [
+              { label: "X", value: 7 }, { label: "Y", value: 4 }, { label: "Z", value: 2 },
+            ] } },
+            options: ["X: 7, Y: 4, Z: 2", "X: 2, Y: 4, Z: 7", "all equal"], answer: "X: 7, Y: 4, Z: 2",
+            hint: "Look at the heights left-to-right." },
+          { prompt: "Detective: a graph has 3 bars all the same height. The data must be…",
+            viz: { type: "barChart", params: { bars: [
+              { label: "A", value: 5 }, { label: "B", value: 5 }, { label: "C", value: 5 },
+            ], label: "All bars same height" } },
+            options: ["all different", "all equal", "two same, one different"], answer: "all equal",
+            hint: "Same height means same count." },
+        ],
+      },
     ],
   });
 })();

@@ -28,11 +28,11 @@
   // (unregistered games) are filtered out at pick time so the daily
   // challenge never lands on a game that doesn't exist.
   const CHALLENGE_GAMES = [
-    "arc-bake-off",
-    "arc-carry-crunch",
-    "arc-fact-frenzy",
-    "arc-dojo-drill",
-    "arc-place-shift",
+    "arc-bubble-blocks",
+    "arc-treasure-trail",
+    "arc-multiply-mountain",
+    "arc-share-shack",
+    "arc-place-parade",
     "arc-pattern-parade",
     "arc-round-up",
     "arc-thousand-quest",
@@ -152,13 +152,16 @@
       });
     }
     // Trophy for hitting streak milestones — delegate to Rewards so it
-    // shows nicely and persists.
+    // shows nicely and persists. The achievements module exposes `get`, not
+    // `byId`, and the actual trophy ids use underscores (see achievements.js):
+    //   streak_3, streak_5, streak_10, streak_20.
     const Rewards = window.MR.Rewards;
     const A = window.MR.Achievements;
-    if (Rewards && A && A.byId) {
-      if (s.streak === 3 && A.byId("streak-3"))  Rewards.earnAchievement(A.byId("streak-3"));
-      if (s.streak === 7 && A.byId("streak-7"))  Rewards.earnAchievement(A.byId("streak-7"));
-      if (s.streak === 30 && A.byId("streak-30")) Rewards.earnAchievement(A.byId("streak-30"));
+    if (Rewards && A && A.get) {
+      if (s.streak === 3  && A.get("streak_3"))  Rewards.earnAchievement(A.get("streak_3"));
+      if (s.streak === 5  && A.get("streak_5"))  Rewards.earnAchievement(A.get("streak_5"));
+      if (s.streak === 10 && A.get("streak_10")) Rewards.earnAchievement(A.get("streak_10"));
+      if (s.streak === 20 && A.get("streak_20")) Rewards.earnAchievement(A.get("streak_20"));
     }
   }
 

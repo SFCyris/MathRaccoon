@@ -22,7 +22,7 @@
         subtitle: "Perimeter is the path around.",
         emoji: "🚶",
         idea: {
-          hook: "Imagine building a fence around a garden. The total length of fence you need is the perimeter — you walk around the outside edge and add up every side.",
+          hook: "Look at the garden below. The perimeter is the total length of fence around it — you walk around the outside edge and add up every side.",
           viz: { type: "perimeterShape", params: { w: 5, h: 3, label: "A garden 5 by 3" } },
           caption: "Walk: 5 across the top + 3 down the side + 5 along the bottom + 3 up the other side.",
         },
@@ -37,8 +37,8 @@
             viz: { type: "perimeterShape", params: { w: 4, h: 2, traceEdge: 2 } } },
           { text: "And up the left side: 2. Back where we started.",
             viz: { type: "perimeterShape", params: { w: 4, h: 2, traceEdge: 3 } } },
-          { text: "Add the four edges: 4 + 2 + 4 + 2 = 12. Perimeter = 12.",
-            equation: "P = 4 + 2 + 4 + 2 = 12" },
+          { text: "Add the four edges. The perimeter is 12.",
+            equation: "4 + 2 + 4 + 2 = 12" },
         ],
         practice: [
           {
@@ -50,6 +50,7 @@
           },
           {
             prompt: "A square has all 4 sides equal to 5. Perimeter?",
+            viz: { type: "perimeterShape", params: { w: 5, h: 5, label: "Square, side 5" } },
             options: [10, 20, 25],
             answer: 20,
             hint: "5 + 5 + 5 + 5 = 20. Or 4 × 5.",
@@ -63,7 +64,7 @@
         emoji: "📐",
         idea: {
           hook: "Rectangles have pairs of equal sides. Two long sides, two short sides. So you don't need to add all four — just add one long and one short, then double.",
-          viz: { type: "perimeterShape", params: { w: 7, h: 4, label: "7 + 4 = 11, then × 2 = 22" } },
+          viz: { type: "perimeterShape", params: { w: 7, h: 4, label: "Rectangle: 7 by 4" } },
         },
         watchMe: [
           { text: "A rectangle: 8 across, 3 tall.",
@@ -84,6 +85,7 @@
           },
           {
             prompt: "A rectangle is 9 wide and 2 tall. Perimeter?",
+            viz: { type: "perimeterShape", params: { w: 9, h: 2 } },
             options: [11, 18, 22],
             answer: 22,
           },
@@ -112,15 +114,17 @@
         practice: [
           {
             prompt: "Rectangle with perimeter 24. One side is 8. What's the other side?",
+            viz: { type: "shapeGrid", params: { shapes: [{ kind: "rectangle", name: "Find the missing side" }] } },
             options: [2, 4, 16],
             answer: 4,
             hint: "2 × 8 = 16. 24 − 16 = 8. Split between two: 8 ÷ 2 = 4.",
           },
           {
             prompt: "Square has perimeter 32. How long is one side?",
+            viz: { type: "shapeGrid", params: { shapes: [{ kind: "square", name: "Find the missing side" }] } },
             options: [4, 8, 16],
             answer: 8,
-            hint: "All 4 sides are equal. 32 ÷ 4 = 8.",
+            hint: "All four sides are equal. What number times 4 gives 32?",
           },
         ],
       },

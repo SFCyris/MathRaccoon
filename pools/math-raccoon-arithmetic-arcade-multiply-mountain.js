@@ -26,7 +26,7 @@ MR.Pools.register({
     { "a": 4, "b": 5,  "hint": "Four fives — 5, 10, 15, 20." },
     { "a": 4, "b": 7,  "hint": "4 × 7 is the same as 7 × 4." },
     { "a": 4, "b": 9,  "hint": "4 × 9 — think 4 × 10 − 4." },
-    { "a": 5, "b": 5,  "hint": "A perfect square — 25." },
+    { "a": 5, "b": 5,  "hint": "Five fives — 5, 10, 15, 20, 25." },
     { "a": 5, "b": 6,  "hint": "Five sixes — skip count by 5." },
     { "a": 5, "b": 8,  "hint": "Five eights — 8, 16, 24, 32, 40." },
     { "a": 6, "b": 4,  "hint": "Same as 4 × 6." },

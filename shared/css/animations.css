@@ -216,19 +216,81 @@
   animation: tv-pop 240ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
-/* Clock — hands sweep from 12 o'clock to their target angle. The
- * renderer outputs hands rotated to their final angle; we override
- * with an animation that starts at 0deg and ramps to the rendered
- * rotation. Achieved cleanly with rotateBy = 0% to 100% on the
- * inherited transform. */
-.teach-clock svg > g[transform*="rotate"] {
+/* Clock — hands SWEEP from 12 o'clock to their target angle. Each hand's
+ * --hand-deg custom property is set inline by the renderer; the keyframe
+ * rotates from 0deg to that target. Hour hand moves slightly slower than
+ * minute hand, mirroring a real clock. Pedagogically: the kid watches time
+ * "tick into place," reinforcing the directional model of a clock.
+ *
+ * Each hand has its OWN keyframe so they can have different durations
+ * without sharing animation-name (sharing causes the same end-state across
+ * hands, breaking the sweep). */
+/* Selector covers BOTH single clock viz (.teach-clock wrapper) and
+ * elapsed-time clockPair viz (.teach-clock-pair wrapper). Originally only
+ * `.teach-clock` was targeted — so every clockPair clock visually rendered
+ * stuck at 12:00 because no animation rule matched its hand groups and
+ * the SVG hands have no inline rotation transform.
+ *
+ * `both` fill-mode keeps the FROM state during the delay AND keeps the TO
+ * state (the actual target rotation) after the sweep finishes. Without
+ * `forwards`/`both`, the hand snaps back to 0deg after the animation —
+ * the clock would always SHOW 12:00 even though the aria-label and SVG
+ * data say otherwise.
+ */
+.clock-hour-hand {
+  animation: tv-hour-sweep 900ms cubic-bezier(0.4, 0, 0.2, 1) 200ms both;
+}
+.clock-min-hand {
+  animation: tv-min-sweep 700ms cubic-bezier(0.4, 0, 0.2, 1) 500ms both;
+}
+@keyframes tv-hour-sweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(var(--hand-deg, 0deg)); }
+}
+@keyframes tv-min-sweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(var(--hand-deg, 0deg)); }
+}
+
+/* Number line — each hop arc fades in with a gentle grow (delay inline). */
+.teach-numline .nl-hop {
   transform-box: fill-box;
   transform-origin: center;
-  animation: tv-clock-fade 400ms ease-out 200ms backwards;
+  animation: tv-hop-appear 360ms cubic-bezier(0.34, 1.36, 0.64, 1) backwards;
 }
-@keyframes tv-clock-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+@keyframes tv-hop-appear {
+  from { opacity: 0; transform: scale(0.6) translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Fraction bar — shaded segments fill left-to-right with a sweep, so the
+ * student sees "we shade 3 of 5 pieces" as an action. Empty segments
+ * appear instantly (they're the scaffold). */
+.teach-fraction .fb-shade {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: tv-fb-fill 380ms ease-out backwards;
+}
+@keyframes tv-fb-fill {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+
+/* Line plot — each X mark pops in one at a time (delay inline per mark).
+ * Pedagogically: each data point being added to the plot. */
+.teach-lineplot .lp-mark {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tv-pop 280ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+
+/* Area grid — only FILLED tiles animate; unfilled ones appear instantly so
+ * the boundary is established first. Filled tiles pop in left-to-right,
+ * top-to-bottom (row-major) — same scan order a child counts in. */
+.teach-areagrid .ag-tile {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tv-pop 240ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
 /* ==================================================================

@@ -37,6 +37,7 @@
           },
           {
             prompt: "6 tens and 2 ones = ?",
+            viz: { type: "placeValue", params: { tens: 6, ones: 2 } },
             options: [26, 62, 602],
             answer: 62,
           },
@@ -69,6 +70,7 @@
           },
           {
             prompt: "4 hundreds + 2 tens + 6 ones = ?",
+            viz: { type: "placeValue", params: { hundreds: 4, tens: 2, ones: 6 } },
             options: [246, 426, 462],
             answer: 426,
           },
@@ -96,13 +98,65 @@
         practice: [
           {
             prompt: "Expand 153. Which is correct?",
+            viz: { type: "placeValue", params: { hundreds: 1, tens: 5, ones: 3, label: "153" } },
             options: ["100 + 50 + 3", "100 + 5 + 3", "1 + 5 + 3"],
             answer: "100 + 50 + 3",
           },
           {
             prompt: "400 + 60 + 2 = ?",
+            viz: { type: "placeValue", params: { hundreds: 4, tens: 6, ones: 2 } },
             options: [264, 462, 642],
             answer: 462,
+          },
+        ],
+      },
+      {
+        id: "reverse-detective",
+        title: "Reverse & Detective",
+        subtitle: "Find the digit, find the number.",
+        emoji: "🔍",
+        idea: {
+          hook: "Sometimes you start with a number and need to find a specific digit's place. Other times you have clues about the digits and need to assemble the number. Same pieces, different direction.",
+          viz: { type: "placeValue", params: { hundreds: 4, tens: 7, ones: 2, label: "472 — what's the digit in each place?" } },
+          caption: "Hundreds: 4. Tens: 7. Ones: 2. Same number, three positions.",
+        },
+        watchMe: [
+          { text: "Reverse: in the number 583, what digit is in the TENS place?",
+            viz: { type: "placeValue", params: { hundreds: 5, tens: 8, ones: 3, label: "583" } } },
+          { text: "Look at the middle digit. The 8 sits in the tens place. So tens digit = 8.",
+            equation: "583 → tens digit: 8" },
+          { text: "Detective: I'm thinking of a number. 3 in the hundreds, 0 in the tens, 6 in the ones.",
+            viz: { type: "placeValue", params: { hundreds: 3, tens: 0, ones: 6, label: "Find me!" } } },
+          { text: "300 + 0 + 6 = 306. The 0 holds the tens place open.",
+            equation: "300 + 6 = 306" },
+          { text: "Compare 247 and 274. Same digits! Different places mean different values.",
+            viz: { type: "placeValue", params: { hundreds: 2, tens: 7, ones: 4, label: "274 — the 7 is in tens" } },
+            equation: "247 < 274 (place matters!)" },
+        ],
+        practice: [
+          {
+            prompt: "In 627, what digit is in the HUNDREDS place?",
+            viz: { type: "placeValue", params: { hundreds: 6, tens: 2, ones: 7, label: "627" } },
+            options: [2, 6, 7], answer: 6,
+            hint: "The first (leftmost) digit is the hundreds place.",
+          },
+          {
+            prompt: "In 405, what's in the TENS place?",
+            viz: { type: "placeValue", params: { hundreds: 4, tens: 0, ones: 5, label: "405" } },
+            options: [0, 4, 5], answer: 0,
+            hint: "The middle digit is 0 — zero tens. The 0 holds the place open.",
+          },
+          {
+            prompt: "A number has 7 hundreds, 2 tens, 9 ones. What is it?",
+            viz: { type: "placeValue", params: { hundreds: 7, tens: 2, ones: 9 } },
+            options: [279, 729, 972], answer: 729,
+            hint: "700 + 20 + 9 = 729.",
+          },
+          {
+            prompt: "Which is BIGGER: 348 or 384? (Same digits, different places.)",
+            viz: { type: "placeValue", params: { hundreds: 3, tens: 8, ones: 4, label: "Compare the digit in each place" } },
+            options: ["348", "384", "equal"], answer: "384",
+            hint: "384 has 8 in the tens place (80). 348 only has 4 tens (40). Place matters.",
           },
         ],
       },

@@ -66,6 +66,7 @@
           },
           {
             prompt: "'Otter had 12 shells. She gave 7 AWAY.' Which operation?",
+            viz: { type: "barModel", params: { whole: 12, parts: [{ value: 7, label: "given" }, { value: 5, label: "left" }] } },
             options: ["+", "−", "×"],
             answer: "−",
             hint: "'Gave away' — things leaving.",
@@ -115,6 +116,7 @@
           },
           {
             prompt: "Mouse is 7 cm tall. Hedgehog is 10 cm tall. How much TALLER is hedgehog?",
+            viz: { type: "barModel", params: { parts: [{ value: 7, label: "Mouse 7" }, { value: 3, label: "?" }], label: "Hedgehog total = 10" } },
             options: [3, 7, 17],
             answer: 3,
             hint: "Comparison story — subtract: 10 − 7.",
@@ -164,6 +166,7 @@
           },
           {
             prompt: "Skunk has 18 leaves to share EQUALLY among 3 friends. How many each?",
+            viz: { type: "equalGroups", params: { groups: 3, size: 6, emoji: "🍃", label: "18 leaves into 3 groups" } },
             options: [3, 6, 21],
             answer: 6,
             hint: "Total is known (18). Divide into 3 groups.",
@@ -202,15 +205,83 @@
         practice: [
           {
             prompt: "'Panda has 12 bamboo shoots. He gives 3 to a friend and eats 2. How many did he GIVE AWAY?' What's the answer?",
+            viz: { type: "storyProblem", params: {
+              scene: "🐼", story: "Panda gave 3 shoots and ate 2. The question only asks about GIVE AWAY.",
+              chips: ["+", "−"],
+            } },
             options: [2, 3, 5],
             answer: 3,
             hint: "The question is ONLY about giving away. Eating 2 doesn't matter.",
           },
           {
             prompt: "'Bunny had 10 carrots. She ate 4 and found 2 more. How many did she EAT?'",
+            viz: { type: "storyProblem", params: {
+              scene: "🐰", story: "Bunny ate 4, found 2 more. Question asks: how many did she EAT?",
+              chips: ["+", "−"],
+            } },
             options: [4, 6, 8],
             answer: 4,
             hint: "The question asks only what she ate.",
+          },
+        ],
+      },
+      {
+        id: "two-step",
+        title: "Two-Step Stories",
+        subtitle: "Two operations, in order.",
+        emoji: "🪜",
+        idea: {
+          hook: "Some stories need TWO math steps. Do the first step. Hold the answer in your head. Then do the second step on that answer. Read the story TWICE if you need to find both questions.",
+          viz: { type: "storyProblem", params: {
+            scene: "🐻",
+            story: "Bear baked 3 trays of 4 muffins each. Then she ate 2. How many left?",
+            chips: ["× then −", "+ then ×", "÷ then +"],
+            highlight: "× then −",
+          } },
+          caption: "Step 1: 3 × 4 = 12 muffins. Step 2: 12 − 2 = 10. Always: step 1 first, then use that answer in step 2.",
+        },
+        watchMe: [
+          { text: "Story: 'Fox had 5 stamps. She got 3 more, then gave half to friend.' What's the FIRST step?",
+            viz: { type: "storyProblem", params: {
+              scene: "🦊", story: "Fox had 5 stamps. She got 3 more, then gave half to friend.",
+              chips: ["+", "÷"],
+            } } },
+          { text: "First, find how many she had after getting more: 5 + 3 = 8.",
+            viz: { type: "storyProblem", params: {
+              scene: "🦊", story: "Step 1: 5 + 3 = 8 stamps.",
+              chips: ["+", "÷"], highlight: "+",
+            } },
+            equation: "5 + 3 = 8" },
+          { text: "Now use that 8. Half of 8 is 4. She gave 4 stamps away.",
+            viz: { type: "storyProblem", params: {
+              scene: "🦊", story: "Step 2: half of 8 = 4. She gave 4 away.",
+              chips: ["+", "÷"], highlight: "÷",
+            } },
+            equation: "8 ÷ 2 = 4" },
+          { text: "TWO steps: first add, then divide. Each step uses the answer from before." },
+          { text: "Trick: underline each step's question. 'GOT MORE' = step 1 (add). 'GAVE HALF' = step 2 (divide)." },
+        ],
+        practice: [
+          {
+            prompt: "Bear had 4 honeycombs. She found 3 more. How many honeycombs in TOTAL did she have to share?",
+            viz: { type: "barModel", params: { parts: [{ value: 4, label: "had 4" }, { value: 3, label: "found 3" }] } },
+            options: [3, 4, 7],
+            answer: 7,
+            hint: "Step 1: count what she had after finding more: 4 + 3 = 7.",
+          },
+          {
+            prompt: "Owl caught 2 mice each night for 4 nights. Then she ate 3. How many LEFT?",
+            viz: { type: "equalGroups", params: { groups: 4, size: 2, emoji: "🐭", label: "2 mice × 4 nights = 8" } },
+            options: [3, 5, 8],
+            answer: 5,
+            hint: "Step 1: 2 × 4 = 8 mice caught. Step 2: 8 − 3 = 5 left.",
+          },
+          {
+            prompt: "Squirrel found 12 nuts and split them into 3 piles. Then she added 2 to one pile. How many in that pile?",
+            viz: { type: "equalGroups", params: { groups: 3, size: 4, emoji: "🌰", label: "12 ÷ 3 = 4 per pile" } },
+            options: [4, 6, 14],
+            answer: 6,
+            hint: "Step 1: 12 ÷ 3 = 4 per pile. Step 2: 4 + 2 = 6.",
           },
         ],
       },

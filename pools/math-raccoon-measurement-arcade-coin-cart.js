@@ -3,16 +3,12 @@
  * =====================================================
  * Money — counting coins, adding prices, making change.
  *
- * FORMAT — each question is a JSON object:
- *   {
- *     "prompt":  "Story text (HTML allowed).",
- *     "answer":  42,                  // cents (number)
- *     "options": [40, 42, 44],        // optional
- *     "suffix":  "¢",                 // usually "¢"
- *     "hint":    "Quarter = 25¢, dime = 10¢, nickel = 5¢, penny = 1¢."
- *   }
- *
- * Teachers & parents: add more money stories freely.
+ * VIZ STRATEGY:
+ *   - Items mentioning specific COIN counts → coinSet showing those coins
+ *   - Items with ¢ AMOUNTS that combine → barModel showing the amounts
+ *   - Items where computing change → barModel { whole: paid, parts: [cost] }
+ *     (empty space = change owed)
+ *   - Pure conversion facts ($1 = ?¢) → no viz (textual concept)
  */
 MR.Pools.register({
   "id": "mea-arcade-coin-cart",
@@ -20,39 +16,89 @@ MR.Pools.register({
   "askedPerRound": 8,
   "questions": [
     { "prompt": "🪙 Mouse pays 15¢ for string and 20¢ for cheese. Total spent?",
-      "answer": 35, "suffix": "¢", "hint": "15 + 20 = 35." },
+      "viz": { "type": "barModel", "params": { "parts": [{ "value": 15, "label": "15¢" }, { "value": 20, "label": "20¢" }] } },
+      "answer": 35, "suffix": "¢", "hint": "Look at both bars. Add the two prices." },
     { "prompt": "🪙 Fox buys an apple for 30¢ and a nut for 25¢. Total?",
-      "answer": 55, "suffix": "¢", "hint": "30 + 25." },
+      "viz": { "type": "barModel", "params": { "parts": [{ "value": 30, "label": "30¢" }, { "value": 25, "label": "25¢" }] } },
+      "answer": 55, "suffix": "¢", "hint": "Look at both bars. Add the two prices." },
     { "prompt": "🪙 Raccoon has 2 quarters and 3 dimes. How many cents?",
-      "answer": 80, "suffix": "¢", "hint": "2 × 25 + 3 × 10 = 80." },
+      "viz": { "type": "coinSet", "params": { "coins": ["quarter", "quarter", "dime", "dime", "dime"] } },
+      "answer": 80, "suffix": "¢", "hint": "Each quarter is 25¢. Each dime is 10¢. Count each kind, then add." },
     { "prompt": "🪙 Hedgehog has 4 dimes and 3 nickels. How many cents?",
-      "answer": 55, "suffix": "¢", "hint": "40 + 15." },
+      "viz": { "type": "coinSet", "params": { "coins": ["dime", "dime", "dime", "dime", "nickel", "nickel", "nickel"] } },
+      "answer": 55, "suffix": "¢", "hint": "Each dime is 10¢. Each nickel is 5¢. Count each kind, then add." },
     { "prompt": "🪙 Owl has 3 quarters and 1 dime. How many cents?",
-      "answer": 85, "suffix": "¢", "hint": "75 + 10." },
+      "viz": { "type": "coinSet", "params": { "coins": ["quarter", "quarter", "quarter", "dime"] } },
+      "answer": 85, "suffix": "¢", "hint": "Each quarter is 25¢. Add the dime (10¢) at the end." },
     { "prompt": "🪙 Bunny pays 50¢ for a carrot. He gave 65¢. How much change?",
-      "answer": 15, "suffix": "¢", "hint": "65 − 50 = 15." },
+      "viz": { "type": "barModel", "params": { "whole": 65, "parts": [{ "value": 50, "label": "carrot 50¢" }] } },
+      "answer": 15, "suffix": "¢", "hint": "Start with what he gave. Take away the carrot price." },
     { "prompt": "🪙 Fox gave 80¢ for a treat that cost 45¢. Change?",
-      "answer": 35, "suffix": "¢", "hint": "80 − 45." },
+      "viz": { "type": "barModel", "params": { "whole": 80, "parts": [{ "value": 45, "label": "treat 45¢" }] } },
+      "answer": 35, "suffix": "¢", "hint": "Start with what Fox gave. Take away the treat price." },
     { "prompt": "🪙 Bear paid 75¢ for a cookie; cookie cost 55¢. Change?",
-      "answer": 20, "suffix": "¢", "hint": "75 − 55." },
-    { "prompt": "🪙 5 nickels equals how many cents?", "answer": 25, "suffix": "¢", "hint": "5 × 5." },
-    { "prompt": "🪙 3 quarters equals how many cents?", "answer": 75, "suffix": "¢", "hint": "3 × 25." },
-    { "prompt": "🪙 7 dimes equals how many cents?", "answer": 70, "suffix": "¢", "hint": "7 × 10." },
-    { "prompt": "🪙 10 pennies + 2 dimes = how many cents?", "answer": 30, "suffix": "¢", "hint": "10 + 20." },
-    { "prompt": "🪙 1 quarter + 2 dimes + 1 nickel = how many cents?", "answer": 50, "suffix": "¢", "hint": "25 + 20 + 5." },
-    { "prompt": "🪙 Squirrel has 40¢ and earns 35¢ more. Total cents?", "answer": 75, "suffix": "¢", "hint": "40 + 35." },
-    { "prompt": "🪙 Mouse has 1 dollar ($1.00) = how many cents?", "answer": 100, "suffix": "¢", "hint": "$1 = 100¢." },
-    { "prompt": "🪙 Raccoon has 90¢ and spends 47¢. Cents left?", "answer": 43, "suffix": "¢", "hint": "90 − 47." },
+      "viz": { "type": "barModel", "params": { "whole": 75, "parts": [{ "value": 55, "label": "cookie 55¢" }] } },
+      "answer": 20, "suffix": "¢", "hint": "Start with what Bear paid. Take away the cookie price." },
+    { "prompt": "🪙 5 nickels equals how many cents?",
+      "viz": { "type": "coinSet", "params": { "coins": ["nickel", "nickel", "nickel", "nickel", "nickel"] } },
+      "answer": 25, "suffix": "¢", "hint": "Each nickel is 5¢. Skip-count by 5s, five times." },
+    { "prompt": "🪙 3 quarters equals how many cents?",
+      "viz": { "type": "coinSet", "params": { "coins": ["quarter", "quarter", "quarter"] } },
+      "answer": 75, "suffix": "¢", "hint": "Each quarter is 25¢. Skip-count by 25s, three times." },
+    { "prompt": "🪙 7 dimes equals how many cents?",
+      "viz": { "type": "coinSet", "params": { "coins": ["dime", "dime", "dime", "dime", "dime", "dime", "dime"] } },
+      "answer": 70, "suffix": "¢", "hint": "Each dime is 10¢. Skip-count by 10s, seven times." },
+    { "prompt": "🪙 10 pennies + 2 dimes = how many cents?",
+      "viz": { "type": "coinSet", "params": { "coins": ["penny", "penny", "penny", "penny", "penny", "penny", "penny", "penny", "penny", "penny", "dime", "dime"] } },
+      "answer": 30, "suffix": "¢", "hint": "Each penny is 1¢. Each dime is 10¢. Count each kind, then add." },
+    { "prompt": "🪙 1 quarter + 2 dimes + 1 nickel = how many cents?",
+      "viz": { "type": "coinSet", "params": { "coins": ["quarter", "dime", "dime", "nickel"] } },
+      "answer": 50, "suffix": "¢", "hint": "Each quarter is 25¢, dime 10¢, nickel 5¢. Add each kind." },
+    { "prompt": "🪙 Squirrel has 40¢ and earns 35¢ more. Total cents?",
+      "viz": { "type": "barModel", "params": { "parts": [{ "value": 40, "label": "40¢" }, { "value": 35, "label": "+ 35¢" }] } },
+      "answer": 75, "suffix": "¢", "hint": "Look at both bars. Add the two amounts." },
+    { "prompt": "🪙 Mouse has 1 dollar ($1.00) = how many cents?",
+      "answer": 100, "suffix": "¢", "hint": "A dollar is the same as 4 quarters. Each quarter is 25¢. Add them up." },
+    { "prompt": "🪙 Raccoon has 90¢ and spends 47¢. Cents left?",
+      "viz": { "type": "barModel", "params": { "whole": 90, "parts": [{ "value": 47, "label": "spent 47¢" }] } },
+      "answer": 43, "suffix": "¢", "hint": "Start with the big bar. Take away the spent part." },
     { "prompt": "🪙 Owl wants a book that costs 60¢. She has 3 dimes and 2 nickels. Does she have enough? How many cents short?",
-      "answer": 20, "suffix": "¢", "hint": "3×10 + 2×5 = 40, then 60 − 40." },
+      "viz": { "type": "coinSet", "params": { "coins": ["dime", "dime", "dime", "nickel", "nickel"], "label": "Owl's coins: 40¢ total. Book: 60¢." } },
+      "answer": 20, "suffix": "¢", "hint": "First add Owl's coins (dimes 10¢, nickels 5¢). Then take that total from 60." },
     { "prompt": "🪙 Pie costs 55¢. Fox pays 3 quarters. Change?",
-      "answer": 20, "suffix": "¢", "hint": "75 − 55." },
-    { "prompt": "🪙 Bunny has 4 nickels and 2 dimes. Total cents?", "answer": 40, "suffix": "¢", "hint": "20 + 20." },
-    { "prompt": "🪙 Squirrel buys 3 acorns at 12¢ each. Total cost?", "answer": 36, "suffix": "¢", "hint": "3 × 12 = 36." },
-    { "prompt": "🪙 Hedgehog buys 2 mushrooms at 25¢ each. Total?", "answer": 50, "suffix": "¢", "hint": "2 × 25." },
-    { "prompt": "🪙 Candy is 15¢. Bear buys 4. Total?", "answer": 60, "suffix": "¢", "hint": "4 × 15 = 60." },
-    { "prompt": "🪙 Mouse has 100¢ and spends 65¢. Change left?", "answer": 35, "suffix": "¢", "hint": "100 − 65." },
+      "viz": { "type": "barModel", "params": { "whole": 75, "parts": [{ "value": 55, "label": "pie 55¢" }] } },
+      "answer": 20, "suffix": "¢", "hint": "First find what 3 quarters is worth. Then take away the pie price." },
+    { "prompt": "🪙 Bunny has 4 nickels and 2 dimes. Total cents?",
+      "viz": { "type": "coinSet", "params": { "coins": ["nickel", "nickel", "nickel", "nickel", "dime", "dime"] } },
+      "answer": 40, "suffix": "¢", "hint": "Each nickel is 5¢. Each dime is 10¢. Count each kind, then add." },
+    { "prompt": "🪙 Squirrel buys 3 acorns at 12¢ each. Total cost?",
+      "viz": { "type": "barModel", "params": { "parts": [{ "value": 12, "label": "12¢" }, { "value": 12, "label": "12¢" }, { "value": 12, "label": "12¢" }] } },
+      "answer": 36, "suffix": "¢", "hint": "Each acorn is 12¢. Add 12¢ three times." },
+    { "prompt": "🪙 Hedgehog buys 2 mushrooms at 25¢ each. Total?",
+      "viz": { "type": "barModel", "params": { "parts": [{ "value": 25, "label": "25¢" }, { "value": 25, "label": "25¢" }] } },
+      "answer": 50, "suffix": "¢", "hint": "Each mushroom is 25¢. Add 25¢ twice." },
+    { "prompt": "🪙 Candy is 15¢. Bear buys 4. Total?",
+      "viz": { "type": "barModel", "params": { "parts": [{ "value": 15 }, { "value": 15 }, { "value": 15 }, { "value": 15 }] } },
+      "answer": 60, "suffix": "¢", "hint": "Each candy is 15¢. Add 15¢ four times." },
+    { "prompt": "🪙 Mouse has 100¢ and spends 65¢. Change left?",
+      "viz": { "type": "barModel", "params": { "whole": 100, "parts": [{ "value": 65, "label": "spent 65¢" }] } },
+      "answer": 35, "suffix": "¢", "hint": "Start with the big bar. Take away the spent part." },
     { "prompt": "🪙 Fox has 2 quarters, 1 dime, 1 nickel, 3 pennies. Total cents?",
-      "answer": 68, "suffix": "¢", "hint": "50 + 10 + 5 + 3." }
+      "viz": { "type": "coinSet", "params": { "coins": ["quarter", "quarter", "dime", "nickel", "penny", "penny", "penny"] } },
+      "answer": 68, "suffix": "¢", "hint": "Quarters 25¢, dime 10¢, nickel 5¢, penny 1¢. Count each kind, then add." },
+
+    // ---- Detective: identify a coin or compare values ----
+    { "prompt": "🔍 Detective: 5 dimes — how much money is that?",
+      "viz": { "type": "coinSet", "params": { "coins": ["dime", "dime", "dime", "dime", "dime"] } },
+      "answer": 50, "suffix": "¢",
+      "hint": "Each dime is 10¢. Skip-count by 10s, five times." },
+    { "prompt": "🔍 Detective: which is MORE — 3 dimes or 7 nickels?",
+      "viz": { "type": "coinSet", "params": { "coins": ["dime", "dime", "dime", "nickel", "nickel", "nickel", "nickel", "nickel", "nickel", "nickel"], "label": "3 dimes vs 7 nickels" } },
+      "options": ["3 dimes", "7 nickels", "equal"], "answer": "7 nickels",
+      "hint": "Find the value of each group. Dimes are 10¢ each. Nickels are 5¢ each. Then compare." },
+    { "prompt": "🔍 Reverse: an item costs 80¢ and I pay $1 (100¢). What's the change?",
+      "viz": { "type": "barModel", "params": { "whole": 100, "parts": [{ "value": 80, "label": "item 80¢" }] } },
+      "answer": 20, "suffix": "¢",
+      "hint": "Count up from the price to what you paid. 80, then 90, then 100." }
   ]
 });

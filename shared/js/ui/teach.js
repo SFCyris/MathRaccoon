@@ -47,10 +47,20 @@
     screen.appendChild(node);
   }
 
+  // playerName is user-supplied. We substitute it into strings that get fed
+  // into innerHTML by richP() below, so escape HTML special chars to prevent
+  // an XSS surface (e.g. a kid typing "<script>" as their name).
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
   function interp(text) {
     const name = (S.getSettings().playerName || "friend").trim() || "friend";
+    const safeName = escapeHtml(name);
     return String(text || "").replace(/\{(\w+)\}/g, (m, k) =>
-      k === "NAME" || k === "name" ? name : m
+      k === "NAME" || k === "name" ? safeName : m
     );
   }
 
@@ -254,7 +264,19 @@
       const opts = h("div", { class: "answer-options teach-answer-options" });
       (prob.options || []).forEach((opt) => {
         const btn = h("button", { class: "answer-btn" });
-        btn.textContent = String(opt);
+        // Use MR.AnswerChips so teach lessons get the same coin / shape /
+        // time / dot chips as the wordProblem-driven arcade games. Without
+        // this, teach buttons would be plain digits while arcade buttons
+        // carry visual aids — exactly the inconsistency the user flagged.
+        if (window.MR && window.MR.AnswerChips && window.MR.AnswerChips.format) {
+          btn.innerHTML = window.MR.AnswerChips.format(opt, prob);
+        } else {
+          btn.textContent = String(opt);
+        }
+        // Equality must compare the RAW option, not the rich HTML. Stash
+        // the option on the button so the "reveal the correct" pass below
+        // can identify the right button regardless of its display content.
+        btn.__opt = opt;
         btn.onclick = () => {
           if (state.practiceAnswered) return;
           state.practiceAnswered = true;
@@ -263,7 +285,7 @@
           opts.querySelectorAll(".answer-btn").forEach((b) => b.classList.add("disabled"));
           if (!correct) {
             opts.querySelectorAll(".answer-btn").forEach((b) => {
-              if (b.textContent === String(prob.answer)) b.classList.add("correct");
+              if (b.__opt === prob.answer) b.classList.add("correct");
             });
           }
           feedback.className = "feedback-banner " + (correct ? "happy" : "oops");

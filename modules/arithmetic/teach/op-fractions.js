@@ -31,8 +31,8 @@
         ],
         practice: [
           {
-            prompt: "What fraction is shaded?",
-            viz: { type: "fractionBar", params: { denom: 4, num: 3 } },
+            prompt: "Tap segments to shade 3 out of 4 parts. Then pick the fraction.",
+            viz: { type: "interactiveFractionBar", params: { denominator: 4, targetNumer: 3, label: "Tap a segment to shade it. The readout shows your fraction." } },
             options: ["1/4", "3/4", "4/3"],
             answer: "3/4",
           },
@@ -51,7 +51,7 @@
         emoji: "🔢",
         idea: {
           hook: "The bottom number counts equal parts in the whole. The top number counts the parts we're talking about.",
-          viz: { type: "fractionBar", params: { denom: 5, num: 2, label: "2 out of 5 shaded = 2/5" } },
+          viz: { type: "fractionBar", params: { denom: 5, num: 2, label: "2 out of 5 shaded → 2/5" } },
         },
         watchMe: [
           { text: "Here's a bar with 8 equal parts, 3 shaded.",
@@ -94,16 +94,54 @@
         practice: [
           {
             prompt: "Which is bigger, 3/8 or 5/8?",
+            viz: { type: "fractionBar", params: { denom: 8, num: 5, label: "5/8" } },
             options: ["3/8", "5/8", "they're equal"],
             answer: "5/8",
           },
           {
             prompt: "Which is bigger, 1/2 or 3/4?",
-            viz: { type: "fractionBar", params: { denom: 4, num: 3, label: "3/4" } },
+            viz: { type: "fractionBarPair", params: { top: { numer: 1, denom: 2 }, bottom: { numer: 3, denom: 4 } } },
             options: ["1/2", "3/4", "they're equal"],
             answer: "3/4",
             hint: "1/2 is the same as 2/4. Compare 2/4 and 3/4."
           },
+        ],
+      },
+      {
+        id: "whole-as-fraction",
+        title: "Whole Numbers Are Fractions Too",
+        subtitle: "5 is the same as 5/1.",
+        emoji: "🎁",
+        idea: {
+          hook: "Every whole number is also a fraction. If you have 5 whole bars and don't cut any of them, that's 5 — but you can also write it as 5/1 (five whole bars, each uncut).",
+          viz: { type: "fractionBar", params: { wholes: 5, label: "5 whole bars" } },
+          caption: "Bottom number is 1: the bar isn't cut at all. Top number: how many whole bars.",
+        },
+        watchMe: [
+          { text: "One whole bar — not cut. That's 1. We can also write it as 1/1.",
+            viz: { type: "fractionBar", params: { denom: 1, num: 1, label: "1 whole bar" } },
+            equation: "1 = 1/1" },
+          { text: "Two whole bars — still uncut. That's 2. We can write it as 2/1.",
+            viz: { type: "fractionBar", params: { wholes: 2, label: "2 whole bars" } },
+            equation: "2 = 2/1" },
+          { text: "Five whole bars — uncut. That's 5. We can write it as 5/1.",
+            viz: { type: "fractionBar", params: { wholes: 5, label: "5 whole bars" } },
+            equation: "5 = 5/1" },
+          { text: "Trick: any whole number N on top with 1 on bottom — it's just that whole number." },
+        ],
+        practice: [
+          { prompt: "Three whole bars. Which fraction matches?",
+            viz: { type: "fractionBar", params: { wholes: 3, label: "3 whole bars" } },
+            options: ["1/3", "3/1", "3/3"], answer: "3/1",
+            hint: "Count the bars. Each bar is uncut, so the bottom is 1." },
+          { prompt: "What does 7/1 equal?",
+            viz: { type: "fractionBar", params: { wholes: 7, label: "7/1" } },
+            options: [1, 7, 17], answer: 7,
+            hint: "Bottom is 1, so each bar is uncut. Count the whole bars." },
+          { prompt: "Which is the same as the number 4?",
+            viz: { type: "fractionBar", params: { wholes: 4, label: "4 whole bars" } },
+            options: ["4/4", "4/1", "1/4"], answer: "4/1",
+            hint: "Count the bars. Each bar is uncut. Top is the count, bottom is 1." },
         ],
       },
     ],
