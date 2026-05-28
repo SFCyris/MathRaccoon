@@ -22,27 +22,25 @@ MR.Pools.register({
       "tokens": [
         { "text": "2/4", "bucket": "half" },
         { "text": "3/6", "bucket": "half" },
+        { "text": "4/8", "bucket": "half" },
         { "text": "2/6", "bucket": "third" },
-        { "text": "3/9", "bucket": "third" },
-        { "text": "2/8", "bucket": "quarter" },
-        { "text": "3/12", "bucket": "quarter" }
+        { "text": "2/8", "bucket": "quarter" }
       ],
       "hint": "Halve the top & bottom until you can't anymore." },
 
     { "kind": "categorize",
       "prompt": "Group these by equivalent value.",
       "buckets": [
-        { "id": "half",  "label": "= 1/2" },
-        { "id": "whole", "label": "= 1 (whole)" },
-        { "id": "fifth", "label": "= 1/5" }
+        { "id": "half",   "label": "= 1/2" },
+        { "id": "whole",  "label": "= 1 (whole)" },
+        { "id": "fourth", "label": "= 1/4" }
       ],
       "tokens": [
         { "text": "4/8", "bucket": "half" },
-        { "text": "5/10", "bucket": "half" },
+        { "text": "3/6", "bucket": "half" },
         { "text": "3/3", "bucket": "whole" },
         { "text": "6/6", "bucket": "whole" },
-        { "text": "2/10", "bucket": "fifth" },
-        { "text": "3/15", "bucket": "fifth" }
+        { "text": "2/8", "bucket": "fourth" }
       ],
       "hint": "Any fraction where top = bottom equals 1 whole." },
 
@@ -72,11 +70,10 @@ MR.Pools.register({
       ],
       "tokens": [
         { "text": "2/6",  "bucket": "third" },
-        { "text": "3/9",  "bucket": "third" },
         { "text": "4/6",  "bucket": "twothird" },
-        { "text": "6/9",  "bucket": "twothird" },
         { "text": "4/4",  "bucket": "whole" },
-        { "text": "5/5",  "bucket": "whole" }
+        { "text": "3/3",  "bucket": "whole" },
+        { "text": "6/6",  "bucket": "whole" }
       ],
       "hint": "Halve or third the fractions to match." },
 
@@ -90,8 +87,8 @@ MR.Pools.register({
       "tokens": [
         { "text": "1/2", "bucket": "less" },
         { "text": "5/8", "bucket": "less" },
+        { "text": "2/4", "bucket": "less" },
         { "text": "6/8", "bucket": "equal" },
-        { "text": "9/12","bucket": "equal" },
         { "text": "7/8", "bucket": "more" },
         { "text": "4/4", "bucket": "more" }
       ],
@@ -106,11 +103,10 @@ MR.Pools.register({
       ],
       "tokens": [
         { "text": "2/8", "bucket": "q1" },
-        { "text": "3/12","bucket": "q1" },
         { "text": "4/8", "bucket": "q2" },
         { "text": "2/4", "bucket": "q2" },
-        { "text": "6/8", "bucket": "q3" },
-        { "text": "9/12","bucket": "q3" }
+        { "text": "3/6", "bucket": "q2" },
+        { "text": "6/8", "bucket": "q3" }
       ],
       "hint": "Divide top and bottom by the same number until simplest." },
 
@@ -124,10 +120,10 @@ MR.Pools.register({
       "tokens": [
         { "text": "1/2", "bucket": "biggest" },
         { "text": "2/3", "bucket": "biggest" },
+        { "text": "1/3", "bucket": "middle" },
         { "text": "1/4", "bucket": "middle" },
-        { "text": "2/5", "bucket": "middle" },
-        { "text": "1/8", "bucket": "smallest" },
-        { "text": "2/9", "bucket": "smallest" }
+        { "text": "1/6", "bucket": "smallest" },
+        { "text": "1/8", "bucket": "smallest" }
       ],
       "hint": "Smaller bottom → bigger slice of the whole." },
   ],

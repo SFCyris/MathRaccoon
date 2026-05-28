@@ -194,7 +194,13 @@
 .control-btn {
   background: white;
   border-radius: var(--radius-md);
-  padding: 8px 14px;
+  padding: 10px 14px;
+  /* Minimum touch target: 44px ensures children with motor delays (especially
+     autism-spectrum learners) can reliably tap these — including the Calm
+     Mode toggle, which they need to be able to hit when overstimulated. */
+  min-height: 44px;
+  min-width: 44px;
+  justify-content: center;
   font-weight: 700;
   font-size: 0.9rem;
   color: var(--c-ink);
@@ -897,11 +903,21 @@ body.calm-mode .hero-spark {
 
 /* Answer choices */
 .answer-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  /* Flex with explicit per-button basis keeps all options visible on a single
+     row at typical tablet widths (≥500px) and falls back to two-up at phone
+     widths. Avoids the prior grid auto-fit behavior where 4-option layouts
+     could push the 4th button below the fold on 7" tablets — critical for
+     learners with working-memory deficits who'd miss the option entirely. */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
 }
 .answer-btn {
+  flex: 1 1 calc(50% - 6px);
+  min-width: 100px;
   background: white;
   border: 4px solid var(--c-lilac);
   border-radius: var(--radius-md);
@@ -912,6 +928,11 @@ body.calm-mode .hero-spark {
   color: var(--c-ink);
   transition: transform var(--anim-fast) ease, background 0.2s, border-color 0.2s;
   box-shadow: 0 4px 0 rgba(167,139,250,0.35);
+}
+@media (min-width: 500px) {
+  /* On tablets and up, lay out 3 or 4 options per row so they don't wrap
+     onto multiple lines when the prompt offers 3+ choices. */
+  .answer-btn { flex: 1 1 calc(33.333% - 8px); }
 }
 .answer-btn:hover  { transform: translateY(-2px); border-color: var(--c-berry); }
 .answer-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(167,139,250,0.35); }
@@ -925,7 +946,121 @@ body.calm-mode .hero-spark {
   border-color: #ef4444;
   animation: shake 0.4s ease;
 }
-.answer-btn.disabled { pointer-events: none; opacity: 0.6; }
+.answer-btn.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---- Visual answer chips ------------------------------------------------
+ * For autism-spectrum and challenged learners, "match the picture" beats
+ * "match the digits". When an answer option can be visualized concretely
+ * (coin amount, shape name, time-of-day), the engine attaches a compact
+ * chip alongside the text via formatOption(). These rules style those chips
+ * inside the existing .answer-btn so the button becomes a two-row card:
+ * text on top, visual chips below.
+ */
+.answer-btn .ans-text {
+  display: block;
+  line-height: 1.1;
+}
+.answer-btn .ans-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+}
+/* Coin chips — colored pill per denomination, count × value text.
+ * Colors mirror the coinSet viz palette so the kid learns the visual
+ * association "quarter = brown, dime = light purple, nickel = darker
+ * purple, penny = coral" across teach and arcade surfaces. */
+.answer-btn .ans-coin-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.answer-btn .ans-coin-25 { background: #d4a373; }                /* quarter */
+.answer-btn .ans-coin-10 { background: #c4b5fd; color: #4a3a85; } /* dime */
+.answer-btn .ans-coin-5  { background: #9a8bbf; }                /* nickel */
+.answer-btn .ans-coin-1  { background: #ff7a93; }                /* penny */
+
+/* Shape glyph — small filled icon next to the text. Inherits currentColor
+ * from the button text so it picks up the correct/wrong color states. */
+.answer-btn .ans-shape {
+  width: 28px;
+  height: 28px;
+  color: var(--c-grape, #a78bfa);
+}
+.answer-btn.correct .ans-shape { color: #10b981; }
+.answer-btn.wrong   .ans-shape { color: #ef4444; }
+
+/* Mini clock — for time-of-day options like "3:15" so the kid can
+ * pattern-match an analog face against the question's clockPair viz. */
+.answer-btn .ans-clock {
+  width: 32px;
+  height: 32px;
+}
+
+/* Number dots — for small-count answer options (≤ 12 across the whole set).
+ * Lets pre-readers count the dots instead of parsing the digit. */
+.answer-btn .ans-chips-dots {
+  gap: 3px;
+  max-width: 140px;
+}
+.answer-btn .ans-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c-grape, #a78bfa);
+  display: inline-block;
+}
+.answer-btn.correct .ans-dot { background: #10b981; }
+.answer-btn.wrong   .ans-dot { background: #ef4444; }
+
+/* Bill chips — same shape as coin chips but for dollar amounts. */
+.answer-btn .ans-bill-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.answer-btn .ans-bill-20 { background: #6ee7b7; color: #135c3a; }
+.answer-btn .ans-bill-10 { background: #7dd3fc; color: #0b3548; }
+.answer-btn .ans-bill-5  { background: #a78bfa; }
+.answer-btn .ans-bill-1  { background: #d4a373; }
+/* Disabled state must not respond to hover/active — older browsers and
+   touch devices with sticky hover otherwise show interactive cues on a
+   button that does nothing, confusing children. */
+.answer-btn.disabled:hover,
+.answer-btn.disabled:active {
+  transform: none;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Calm mode: the shake animation is jarring for sensory-sensitive learners.
+   Replace it with a steady wrong-state appearance (color signal only). The
+   correct-pulse is gentler and stays. */
+body.calm-mode .answer-btn.wrong {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .answer-btn.wrong { animation: none !important; }
+}
 
 @keyframes correct-pulse {
   0%, 100% { transform: scale(1); }

@@ -44,11 +44,11 @@
               ],
             } } },
           { text: "On Monday: count the icons. 4 acorns.",
-            equation: "Monday = 4" },
+            equation: "Monday: 4 acorns" },
           { text: "Wednesday had the most: 6 acorns.",
-            equation: "Wednesday = 6" },
+            equation: "Wednesday: 6 acorns" },
           { text: "Total across all three days: 4 + 2 + 6 = 12 acorns.",
-            equation: "Total = 12" },
+            equation: "4 + 2 + 6 = 12" },
         ],
         practice: [
           {
@@ -83,7 +83,7 @@
         subtitle: "Sometimes one icon = more than one.",
         emoji: "🔑",
         idea: {
-          hook: "Big pictographs get CROWDED if each icon is only worth 1. So sometimes the key says '🐝 = 5 bees' — meaning each bee icon stands for five real bees. You MUST read the key before counting, or your answer will be totally wrong.",
+          hook: "Big pictographs get CROWDED if each icon is only worth 1. So sometimes the key says '🐝 means 5 bees' — meaning each bee icon stands for five real bees. You MUST read the key before counting, or your answer will be totally wrong.",
           viz: { type: "pictograph", params: {
             rows: [
               { label: "Hive 1", count: 3, icon: "🐝" },
@@ -112,7 +112,7 @@
         ],
         practice: [
           {
-            prompt: "Each 🐟 = 10 fish. A row has 4 fish icons. How many real fish?",
+            prompt: "Each 🐟: 10 fish. A row has 4 fish icons. How many real fish?",
             viz: { type: "pictograph", params: {
               rows: [{ label: "Lake", count: 4, icon: "🐟" }],
               icon: "🐟", scale: 10,
@@ -122,10 +122,11 @@
             hint: "4 × 10 = 40.",
           },
           {
-            prompt: "Each 🌸 = 3 flowers. A row has 5 flower icons. Real flowers?",
+            prompt: "Each 🌸 means 3 flowers. A row has 5 flower icons. How many real flowers?",
+            viz: { type: "skipCountPicto", params: { icon: "🌸", scale: 3, count: 5 } },
             options: [8, 15, 35],
             answer: 15,
-            hint: "5 × 3 = 15.",
+            hint: "Each icon stands for 3 flowers. Skip-count by 3s along the row.",
           },
         ],
       },
@@ -171,10 +172,17 @@
             hint: "Subtract: 7 − 4 = 3.",
           },
           {
-            prompt: "Each 🍓 = 5 berries. Row 1 has 2 icons. Row 2 has 4 icons. How many more berries in row 2?",
+            prompt: "Each 🍓: 5 berries. Row 1 has 2 icons. Row 2 has 4 icons. How many more berries in row 2?",
+            viz: { type: "pictograph", params: {
+              rows: [
+                { label: "Row 1", count: 2, icon: "🍓" },
+                { label: "Row 2", count: 4, icon: "🍓" },
+              ],
+              icon: "🍓", scale: 5,
+            } },
             options: [2, 10, 20],
             answer: 10,
-            hint: "Row 1 = 10 berries. Row 2 = 20. Difference = 10.",
+            hint: "Multiply each row by the key value. Then find the difference between the two totals.",
           },
         ],
       },

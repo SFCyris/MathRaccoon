@@ -101,16 +101,17 @@
 
   function renderVisual(p) {
     if (!p || !p.kind) return "";
-    if (p.kind === "arrange")      return renderArrange(p);
-    if (p.kind === "categorize")   return renderCategorize(p);
-    if (p.kind === "linePlot")     return renderLinePlot(p);
-    if (p.kind === "numberLine")   return renderNumberLine(p);
-    if (p.kind === "partition")    return renderPartition(p);
-    if (p.kind === "balance")      return renderBalance(p);
-    if (p.kind === "digitTiles")   return renderDigitTiles(p);
-    if (p.kind === "ruler")        return renderRuler(p);
-    if (p.kind === "shapeCompose") return renderShapeCompose(p);
-    if (p.kind === "barGraph")     return renderBarGraph(p);
+    if (p.kind === "arrange")       return renderArrange(p);
+    if (p.kind === "functionTable") return renderFunctionTable(p);
+    if (p.kind === "categorize")    return renderCategorize(p);
+    if (p.kind === "linePlot")      return renderLinePlot(p);
+    if (p.kind === "numberLine")    return renderNumberLine(p);
+    if (p.kind === "partition")     return renderPartition(p);
+    if (p.kind === "balance")       return renderBalance(p);
+    if (p.kind === "digitTiles")    return renderDigitTiles(p);
+    if (p.kind === "ruler")         return renderRuler(p);
+    if (p.kind === "shapeCompose")  return renderShapeCompose(p);
+    if (p.kind === "barGraph")      return renderBarGraph(p);
     return "";
   }
 
@@ -131,6 +132,117 @@
       <div class="dd-widget dd-arrange" id="${p._dragId}" data-kind="arrange">
         <div class="dd-slots-row">${slotsHtml}</div>
         <div class="dd-bank-label">Word bank</div>
+        <div class="dd-bank" data-bank="true">${tokensHtml}</div>
+      </div>`;
+  }
+
+  // ---- functionTable -----------------------------------------------------
+  // Drag the missing IN or OUT into each row of a function table. Mirrors the
+  // visual language of the Teach lesson (machine + IN/OUT table, IN=blue,
+  // OUT=green, RULE=yellow, UNKNOWN=coral) so a child who just learned the
+  // concept recognises the picture in the Arcade.
+  //
+  // Question shape:
+  //   {
+  //     kind: "functionTable",
+  //     prompt: "Function rule: +4. Drag the OUT for each row.",
+  //     rule:   { op: "+", n: 4 },        // shown in the machine's rule box
+  //     rows:   [{ in: 1, out: null }, ...],  // null cell ⇒ drop slot
+  //     tokens: ["5", "6", "7", "4", "8"],    // answers + decoys
+  //     answer: ["5", "6", "7"],              // values for slots in row order
+  //   }
+  function renderFunctionTable(p) {
+    // Colour language — kept in sync with the teach `functionTable` viz.
+    const C_IN   = "#7dd3fc";
+    const C_OUT  = "#6ee7b7";
+    const C_RULE = "#ffd93d";
+    const C_INK  = "#6b5b95";
+
+    const rule = p.rule || { op: "?", n: "?" };
+    const ruleText = `${rule.op} ${rule.n}`;
+    const rows = Array.isArray(p.rows) ? p.rows : [];
+    // Empty rows → unanswerable question. Surface visibly rather than render
+    // a malformed table with zero drop slots that the validator will still
+    // accept as "complete" (placed.length === target.length === 0 → true).
+    if (rows.length === 0) {
+      console.error("functionTable: no rows provided", p);
+      return `<div class="dd-widget dd-functiontable dd-functiontable-error"
+                   id="${p._dragId}" role="alert"
+                   style="background:#ff7a93;color:#fff;padding:14px;border-radius:10px;">
+        ⚠ Function table question has no rows. Check the pool item.
+      </div>`;
+    }
+
+    // Machine SVG — simplified vs the teach viz: just the rule box + arrows.
+    // Each table row already carries its own IN/OUT, so the machine here only
+    // needs to declare the rule, not animate a single I/O pair.
+    const machineSvg = `
+      <svg viewBox="0 0 200 150" role="img" aria-label="Function machine showing rule ${ruleText}"
+           class="dd-ft-machine-svg">
+        <rect x="6" y="32" width="188" height="14" rx="6"
+              fill="#efeafd" stroke="${C_INK}" stroke-width="1.5"/>
+        <g>
+          <line x1="14" y1="39" x2="48" y2="39" stroke="${C_INK}" stroke-width="3"/>
+          <polygon points="48,33 58,39 48,45" fill="${C_INK}"/>
+        </g>
+        <g>
+          <line x1="142" y1="39" x2="180" y2="39" stroke="${C_INK}" stroke-width="3"/>
+          <polygon points="180,33 190,39 180,45" fill="${C_INK}"/>
+        </g>
+        <g>
+          <rect x="60" y="14" width="80" height="100" rx="14"
+                fill="${C_RULE}" stroke="${C_INK}" stroke-width="3"/>
+          <circle cx="78" cy="8"  r="6" fill="${C_INK}"/>
+          <circle cx="100" cy="4" r="7" fill="${C_INK}"/>
+          <circle cx="122" cy="8" r="6" fill="${C_INK}"/>
+          <text x="100" y="74" text-anchor="middle"
+                font-family="Fredoka, sans-serif" font-size="28"
+                font-weight="900" fill="${C_INK}">${escapeHtml(ruleText)}</text>
+          <text x="100" y="134" text-anchor="middle"
+                font-family="Fredoka, sans-serif" font-size="13"
+                font-weight="800" fill="${C_INK}">RULE</text>
+        </g>
+      </svg>`;
+
+    // Table — HTML (not SVG) so the drop slots can be real DOM nodes that
+    // accept tokens. Slot indices increase in DOM order so the existing
+    // .dd-slot validator pattern Just Works.
+    let slotIdx = 0;
+    const rowsHtml = rows.map((r, rowI) => {
+      const inIsSlot  = r.in  === null || r.in  === undefined;
+      const outIsSlot = r.out === null || r.out === undefined;
+      const inCell = inIsSlot
+        ? `<div class="dd-slot dd-slot-ft dd-slot-ft-in" data-slot-index="${slotIdx++}"
+                aria-label="Drop IN for row ${rowI + 1}"></div>`
+        : `<div class="dd-ft-cell dd-ft-cell-in" style="--ft-cell:${C_IN};">${escapeHtml(String(r.in))}</div>`;
+      const outCell = outIsSlot
+        ? `<div class="dd-slot dd-slot-ft dd-slot-ft-out" data-slot-index="${slotIdx++}"
+                aria-label="Drop OUT for row ${rowI + 1}"></div>`
+        : `<div class="dd-ft-cell dd-ft-cell-out" style="--ft-cell:${C_OUT};">${escapeHtml(String(r.out))}</div>`;
+      return `<div class="dd-ft-row">${inCell}${outCell}</div>`;
+    }).join("");
+
+    const shuffledTokens = shuffle((p.tokens || []).slice());
+    const tokensHtml = shuffledTokens.map((t) =>
+      `<button type="button" class="dd-token" draggable="true"
+               data-token="${encodeAttr(t)}" data-home="bank">
+         ${escapeHtml(t)}
+       </button>`
+    ).join("");
+
+    return `
+      <div class="dd-widget dd-functiontable" id="${p._dragId}" data-kind="functionTable">
+        <div class="dd-ft-stage">
+          <div class="dd-ft-machine">${machineSvg}</div>
+          <div class="dd-ft-table" role="table" aria-label="Function table">
+            <div class="dd-ft-row dd-ft-header" role="row">
+              <div class="dd-ft-head" role="columnheader">IN</div>
+              <div class="dd-ft-head" role="columnheader">OUT</div>
+            </div>
+            ${rowsHtml}
+          </div>
+        </div>
+        <div class="dd-bank-label">Drop the right number into each blank</div>
         <div class="dd-bank" data-bank="true">${tokensHtml}</div>
       </div>`;
   }
@@ -414,26 +526,57 @@
       </div>`;
   }
 
-  // BAR GRAPH — click categories to build bar heights.
+  // BAR GRAPH — click categories OR use +/- steppers to build bar heights.
   //   { kind: "barGraph", prompt, categories: ["apples","pears","grapes"],
   //     scale: { max: 10, step: 1 }, answer: {apples: 4, pears: 6, grapes: 3}, hint }
+  //
+  // UX design (PhD pedagogue + autism-spectrum friendly):
+  //   • Explicit +/- buttons per bar — direct affordance, no "tap empty space"
+  //     guessing. Each bar has its OWN undo via the - button.
+  //   • Live numeric value next to +/- — kid reads the count without counting
+  //     bricks or estimating height.
+  //   • Bar itself is still clickable (= add 1) — keeps the shortcut for kids
+  //     who discover it, but no longer the ONLY way to interact.
+  //   • Grid lines + y-axis labels (existing) let kids verify height matches
+  //     the target visually too.
   function renderBarGraph(p) {
     const cats = p.categories || [];
     const max = (p.scale && p.scale.max) || 10;
     const step = (p.scale && p.scale.step) || 1;
     const unit = (p.scale && p.scale.unit) || "";
-    const catsHtml = cats.map((c, i) =>
-      `<button type="button" class="dd-bg-col" data-cat="${encodeAttr(c)}"
-               aria-label="Add 1 to ${escapeHtml(c)}">
+    // Bars: each col is a div (not a button — we have child buttons now,
+    // and nested buttons are invalid HTML). The .dd-bg-stack inside is the
+    // clickable shortcut.
+    const catsHtml = cats.map((c) =>
+      `<div class="dd-bg-col" data-cat="${encodeAttr(c)}"
+            role="slider" tabindex="0" aria-label="Set ${escapeHtml(c)} bar height — click at the height you want"
+            aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="0">
          <div class="dd-bg-stack"></div>
          <div class="dd-bg-label">${escapeHtml(c)}</div>
-       </button>`
+       </div>`
     ).join("");
     const ticks = [];
     for (let v = 0; v <= max; v += step) ticks.push(v);
     const gridHtml = ticks.map((v) =>
       `<div class="dd-bg-gridline" style="bottom:${(v / max) * 100}%">
          <span>${v}</span>
+       </div>`
+    ).join("");
+    // Per-bar stepper row: [−] [value] [+] for each category. The outer
+    // `.dd-bg-stepper-col` is the flex-1 column that aligns horizontally
+    // with the bar above (same `flex: 1` distribution + same padding as
+    // `.dd-bg-col`). The inner `.dd-bg-stepper-box` is the visible rounded
+    // widget, centered within its column. This two-level structure is what
+    // guarantees the value badge sits directly under its bar label.
+    const steppersHtml = cats.map((c) =>
+      `<div class="dd-bg-stepper-col" data-cat="${encodeAttr(c)}">
+         <div class="dd-bg-stepper" data-cat="${encodeAttr(c)}">
+           <button type="button" class="dd-bg-minus" data-cat="${encodeAttr(c)}"
+                   aria-label="Remove 1 from ${escapeHtml(c)}">−</button>
+           <span class="dd-bg-value" data-cat="${encodeAttr(c)}">0</span>
+           <button type="button" class="dd-bg-plus" data-cat="${encodeAttr(c)}"
+                   aria-label="Add 1 to ${escapeHtml(c)}">+</button>
+         </div>
        </div>`
     ).join("");
     const unitHtml = unit ? `<div class="dd-bg-unit">${escapeHtml(unit)}</div>` : "";
@@ -445,8 +588,8 @@
           <div class="dd-bg-grid">${gridHtml}</div>
           <div class="dd-bg-cols">${catsHtml}</div>
         </div>
+        <div class="dd-bg-steppers">${steppersHtml}</div>
         <div class="dd-bg-controls">
-          <button type="button" class="dd-bg-undo">↶ Undo last</button>
           <button type="button" class="dd-bg-clear">🧹 Clear all</button>
         </div>
       </div>`;
@@ -459,7 +602,7 @@
     const host = rootEl.querySelector(`#${p._dragId}`);
     if (!host) return;
     const kind = p.kind;
-    if (kind === "arrange" || kind === "categorize" || kind === "balance" || kind === "digitTiles") {
+    if (kind === "arrange" || kind === "functionTable" || kind === "categorize" || kind === "balance" || kind === "digitTiles") {
       wirePointerDrag(host);
     }
     if (kind === "numberLine")   wireNumberLine(host);
@@ -590,13 +733,13 @@
 
   // Click-to-cycle: tap a token in bank → goes to first empty single-token slot;
   // tap a placed token → goes home (next matching bucket or back to bank).
-  const SINGLE_TOKEN_SLOT = ".dd-slot-arrange, .dd-slot-bal, .dd-slot-digit";
+  const SINGLE_TOKEN_SLOT = ".dd-slot-arrange, .dd-slot-ft, .dd-slot-bal, .dd-slot-digit";
   function cycleTokenHome(tok, host) {
     const kind = host.dataset.kind;
     const parent = tok.parentElement;
     if (parent && parent.hasAttribute("data-bank")) {
       let target = null;
-      if (kind === "arrange" || kind === "balance" || kind === "digitTiles") {
+      if (kind === "arrange" || kind === "functionTable" || kind === "balance" || kind === "digitTiles") {
         target = Array.from(host.querySelectorAll(SINGLE_TOKEN_SLOT))
           .find((s) => !s.querySelector(".dd-token")) || null;
       }
@@ -856,32 +999,108 @@
   // ------------------------------------------------------------------
   function wireBarGraph(host) {
     const max = Number(host.dataset.max) || 10;
-    const history = [];
-    host.__bgHistory = history;
+
+    // updateValue() syncs the numeric badge next to the +/- buttons with
+    // the actual brick count in the stack. Called after every add/remove.
+    // Also updates aria-valuenow on the column so screen readers announce
+    // the new value when the kid changes it via click or arrow keys.
+    function updateValue(cat) {
+      const col = host.querySelector(`.dd-bg-col[data-cat="${CSS.escape(cat)}"]`);
+      if (!col) return;
+      const stack = col.querySelector(".dd-bg-stack");
+      const count = stack.children.length;
+      stack.style.height = (count / max) * 100 + "%";
+      col.setAttribute("aria-valuenow", String(count));
+      const valueEl = host.querySelector(`.dd-bg-value[data-cat="${CSS.escape(cat)}"]`);
+      if (valueEl) valueEl.textContent = String(count);
+    }
+
+    function addBrick(cat) {
+      const col = host.querySelector(`.dd-bg-col[data-cat="${CSS.escape(cat)}"]`);
+      if (!col) return;
+      const stack = col.querySelector(".dd-bg-stack");
+      if (stack.children.length >= max) return;     // capped at scale.max
+      const brick = document.createElement("span");
+      brick.className = "dd-bg-unit-brick";
+      stack.appendChild(brick);
+      updateValue(cat);
+    }
+
+    function removeBrick(cat) {
+      const col = host.querySelector(`.dd-bg-col[data-cat="${CSS.escape(cat)}"]`);
+      if (!col) return;
+      const stack = col.querySelector(".dd-bg-stack");
+      if (stack.children.length === 0) return;     // can't go below 0
+      stack.removeChild(stack.lastChild);
+      updateValue(cat);
+    }
+
+    // setBarTo(cat, n) clears the stack and rebuilds it with N bricks. Used
+    // by the click-to-set-height interaction below — most powerful affordance
+    // because it lets the kid jump straight to the value they want.
+    function setBarTo(cat, value) {
+      const col = host.querySelector(`.dd-bg-col[data-cat="${CSS.escape(cat)}"]`);
+      if (!col) return;
+      const stack = col.querySelector(".dd-bg-stack");
+      const clamped = Math.max(0, Math.min(max, Math.round(value)));
+      stack.innerHTML = "";
+      for (let i = 0; i < clamped; i++) {
+        const brick = document.createElement("span");
+        brick.className = "dd-bg-unit-brick";
+        stack.appendChild(brick);
+      }
+      updateValue(cat);
+    }
+
+    // Click anywhere on a bar column → set the bar to the clicked HEIGHT
+    // (snapped to the nearest integer on the y-axis). This is the strongest
+    // direct-manipulation pattern for 3rd graders: "I want it at 7? Click
+    // where the 7 line is." The bar grows or shrinks to match.
+    //
+    // The +/- stepper buttons (below) remain for fine-grained adjustment;
+    // the col click is the gross-adjustment shortcut.
     host.querySelectorAll(".dd-bg-col").forEach((col) => {
-      col.addEventListener("click", () => {
-        const stack = col.querySelector(".dd-bg-stack");
-        const current = stack.children.length;
-        if (current >= max) return;
-        const unit = document.createElement("span");
-        unit.className = "dd-bg-unit-brick";
-        stack.appendChild(unit);
-        // Set height relative to max
-        const pct = ((current + 1) / max) * 100;
-        stack.style.height = pct + "%";
-        history.push({ cat: col.dataset.cat, node: unit, col });
+      const cat = col.dataset.cat;
+      if (!cat) return;
+      col.addEventListener("click", (e) => {
+        const rect = col.getBoundingClientRect();
+        const y = e.clientY - rect.top;
+        // y=0 is the top of the column (= max value); y=height is the
+        // baseline (= 0). Round to nearest integer so the bar snaps to a
+        // grid line, which is what the kid was aiming at anyway.
+        const ratio = (rect.height - y) / rect.height;
+        const value = Math.round(ratio * max);
+        setBarTo(cat, value);
+      });
+      // Keyboard accessibility for role="slider" on the column: arrow keys
+      // adjust the bar by 1, Home/End jump to min/max. Standard slider WAI
+      // pattern. Screen readers announce the new value via aria-valuenow.
+      col.addEventListener("keydown", (e) => {
+        let handled = true;
+        if (e.key === "ArrowUp" || e.key === "ArrowRight") addBrick(cat);
+        else if (e.key === "ArrowDown" || e.key === "ArrowLeft") removeBrick(cat);
+        else if (e.key === "Home") setBarTo(cat, 0);
+        else if (e.key === "End") setBarTo(cat, max);
+        else handled = false;
+        if (handled) e.preventDefault();
       });
     });
-    host.querySelector(".dd-bg-undo").addEventListener("click", () => {
-      const last = history.pop();
-      if (!last) return;
-      if (last.node && last.node.parentNode) last.node.parentNode.removeChild(last.node);
-      const stack = last.col.querySelector(".dd-bg-stack");
-      stack.style.height = ((stack.children.length) / max) * 100 + "%";
-    });
+
+    // Explicit +/- stepper buttons (precise ±1 control).
+    host.querySelectorAll(".dd-bg-plus").forEach((btn) =>
+      btn.addEventListener("click", () => addBrick(btn.dataset.cat))
+    );
+    host.querySelectorAll(".dd-bg-minus").forEach((btn) =>
+      btn.addEventListener("click", () => removeBrick(btn.dataset.cat))
+    );
+
+    // Clear all — still useful for a fresh restart.
     host.querySelector(".dd-bg-clear").addEventListener("click", () => {
-      host.querySelectorAll(".dd-bg-stack").forEach((s) => { s.innerHTML = ""; s.style.height = "0%"; });
-      history.length = 0;
+      host.querySelectorAll(".dd-bg-stack").forEach((s) => {
+        s.innerHTML = "";
+        s.style.height = "0%";
+      });
+      host.querySelectorAll(".dd-bg-value").forEach((v) => { v.textContent = "0"; });
     });
   }
 
@@ -891,8 +1110,9 @@
   function optionsEqual(chosen, answer, p) {
     const host = document.getElementById(p._dragId);
     if (!host) return false;
-    if (p.kind === "arrange")      return validateArrange(p, host);
-    if (p.kind === "categorize")   return validateCategorize(p, host);
+    if (p.kind === "arrange")       return validateArrange(p, host);
+    if (p.kind === "functionTable") return validateFunctionTable(p, host);
+    if (p.kind === "categorize")    return validateCategorize(p, host);
     if (p.kind === "linePlot")     return validateLinePlot(p, host);
     if (p.kind === "numberLine")   return validateNumberLine(p, host);
     if (p.kind === "partition")    return validatePartition(p, host);
@@ -906,6 +1126,23 @@
 
   function validateArrange(p, host) {
     const slots = Array.from(host.querySelectorAll(".dd-slot"));
+    const placed = slots.map((s) => {
+      const t = s.querySelector(".dd-token");
+      return t ? t.dataset.token : null;
+    });
+    const target = p.answer || [];
+    if (placed.length !== target.length) return false;
+    for (let i = 0; i < target.length; i++) {
+      if (placed[i] !== target[i]) return false;
+    }
+    return true;
+  }
+
+  // Function-table slots live inside table cells, not a single slots row, but
+  // the validation contract is identical: each .dd-slot-ft in DOM order holds
+  // the token that should equal answer[i]. Reuse the same compare loop.
+  function validateFunctionTable(p, host) {
+    const slots = Array.from(host.querySelectorAll(".dd-slot-ft"));
     const placed = slots.map((s) => {
       const t = s.querySelector(".dd-token");
       return t ? t.dataset.token : null;

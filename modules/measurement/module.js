@@ -33,6 +33,7 @@
       "mea-op-elapsed-time",
       "mea-op-money",
       "mea-op-capacity",
+      "mea-op-mass",
       "mea-op-unit-convert",
     ],
     critterPool: [

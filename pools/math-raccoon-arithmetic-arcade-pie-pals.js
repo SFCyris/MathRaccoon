@@ -59,11 +59,10 @@ MR.Pools.register({
     { "mode": "equivalent", "f": { "n": 2, "d": 8 }, "equiv": { "n": 1, "d": 4 }, "hint": "2/8 simplifies to 1/4." },
     { "mode": "equivalent", "f": { "n": 4, "d": 6 }, "equiv": { "n": 2, "d": 3 }, "hint": "4/6 = 2/3." },
     { "mode": "equivalent", "f": { "n": 6, "d": 8 }, "equiv": { "n": 3, "d": 4 }, "hint": "6/8 = 3/4 — both halved." },
-    { "mode": "equivalent", "f": { "n": 1, "d": 4 }, "mult": 3, "hint": "1/4 = 3/12 (not shown), or use the 3× pattern." },
-    { "mode": "equivalent", "f": { "n": 2, "d": 3 }, "mult": 3, "hint": "2/3 = 6/9." },
+    { "mode": "equivalent", "f": { "n": 1, "d": 4 }, "mult": 2, "hint": "1/4 = 2/8 — double top AND bottom." },
+    { "mode": "equivalent", "f": { "n": 2, "d": 3 }, "mult": 2, "hint": "2/3 = 4/6." },
 
     // ---- More comparisons ----
-    { "mode": "compare", "f": { "n": 1, "d": 2 }, "other": { "n": 2, "d": 4 }, "hint": "1/2 equals 2/4 — pick whichever you'd draw bigger on a number line." },
     { "mode": "compare", "f": { "n": 2, "d": 3 }, "other": { "n": 1, "d": 3 }, "hint": "Same bottom — compare tops." },
     { "mode": "compare", "f": { "n": 3, "d": 8 }, "other": { "n": 1, "d": 4 }, "hint": "1/4 = 2/8, so 3/8 is larger." },
     { "mode": "compare", "f": { "n": 1, "d": 2 }, "other": { "n": 3, "d": 8 }, "hint": "1/2 = 4/8 — bigger than 3/8." },

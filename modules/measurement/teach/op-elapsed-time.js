@@ -65,6 +65,7 @@
           },
           {
             prompt: "Otter napped from 1:00 to 5:00. How long?",
+            viz: { type: "timeline", params: { start: "1:00", end: "5:00", hops: [] } },
             options: ["3 hours", "4 hours", "5 hours"],
             answer: "4 hours",
           },
@@ -106,7 +107,7 @@
             } } },
           { text: "Total: 15 minutes + 1 hour = 1 hour 15 minutes.",
             equation: "1 hour 15 minutes" },
-          { text: "The trick: NEVER subtract digits directly across hour boundaries. Bridge up first." },
+          { text: "The rule: NEVER subtract digits directly across hour boundaries. Bridge up first." },
         ],
         practice: [
           {
@@ -114,9 +115,9 @@
             viz: { type: "timeline", params: {
               start: "2:45", end: "4:15",
               hops: [
-                { from: "2:45", to: "3:00", text: "+15" },
-                { from: "3:00", to: "4:00", text: "+1h" },
-                { from: "4:00", to: "4:15", text: "+15" },
+                { from: "2:45", to: "3:00" },
+                { from: "3:00", to: "4:00" },
+                { from: "4:00", to: "4:15" },
               ],
             } },
             options: ["1 hour 15 minutes", "1 hour 30 minutes", "2 hours"],
@@ -125,6 +126,13 @@
           },
           {
             prompt: "Lesson from 9:30 to 10:15. How long?",
+            viz: { type: "timeline", params: {
+              start: "9:30", end: "10:15",
+              hops: [
+                { from: "9:30", to: "10:00" },
+                { from: "10:00", to: "10:15" },
+              ],
+            } },
             options: ["30 minutes", "45 minutes", "1 hour"],
             answer: "45 minutes",
             hint: "Bridge 9:30 → 10:00 (30 min), then 10:00 → 10:15 (15 min).",
@@ -170,12 +178,14 @@
         practice: [
           {
             prompt: "Story time starts at 7:00 and lasts 45 minutes. When does it end?",
+            viz: { type: "timeline", params: { start: "7:00", end: "7:45", hops: [{ from: "7:00", to: "7:45" }] } },
             options: ["7:30", "7:45", "8:00"],
             answer: "7:45",
             hint: "7:00 + 45 minutes = 7:45.",
           },
           {
             prompt: "Painting took 2 hours and was finished at 5:00. When did it start?",
+            viz: { type: "timeline", params: { start: "3:00", end: "5:00", hops: [{ from: "3:00", to: "4:00" }, { from: "4:00", to: "5:00" }] } },
             options: ["2:00", "3:00", "4:00"],
             answer: "3:00",
             hint: "Work backwards: subtract 2 hours from 5:00.",
@@ -188,14 +198,14 @@
         subtitle: "Read each clock face, then count hops.",
         emoji: "🕰️",
         idea: {
-          hook: "Sometimes the START and the END are drawn as clock faces instead of written as numbers. Read each clock first: short hand = hour, long hand = minutes (count by 5s). THEN use the same hopping trick to count the gap.",
+          hook: "Sometimes the START and the END are drawn as clock faces instead of written as numbers. Read each clock first: short hand = hour, long hand = minutes (count by 5s). THEN use the same hopping strategy to count the gap.",
           viz: { type: "clockPair", params: {
             mode: "analog",
             start: { hour: 2, minute: 0 },
             end: { hour: 5, minute: 0 },
             startLabel: "Starts", endLabel: "Ends",
             arrowText: "?",
-            label: "Same shape, same trick — you just read the faces first.",
+            label: "Same shape, same strategy — you just read the faces first.",
           } },
           caption: "Step 1: read each clock. Step 2: hop from start to end.",
         },
@@ -360,7 +370,7 @@
               startLabel: "Analog", endLabel: "Digital",
               arrowText: "=",
             } } },
-          { text: "Translation trick: the long hand's NUMBER × 5 = the minutes. Long hand on 3 → 15 minutes. Long hand on 6 → 30 minutes. Long hand on 9 → 45 minutes." },
+          { text: "Translation rule: the long hand's NUMBER × 5 = the minutes. Long hand on 3 → 15 minutes. Long hand on 6 → 30 minutes. Long hand on 9 → 45 minutes." },
           { text: "Now use the translation to solve elapsed time. Analog start reads 5:00; digital end reads 6:45. How long?",
             viz: { type: "clockPair", params: {
               mode: "mixed",

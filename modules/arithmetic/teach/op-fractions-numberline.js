@@ -57,7 +57,7 @@
         subtitle: "2/4 and 1/2 live at the same tick.",
         emoji: "🪞",
         idea: {
-          hook: "Two fractions can name the exact same point on the line. 1/2 and 2/4 both land in the middle — they're twins wearing different outfits.",
+          hook: "Two fractions can name the exact same point on the line. 1/2 and 2/4 both land at the middle of the line. They are equal — just written differently.",
           viz: { type: "fractionNumline", params: { denom: 4, markAt: 2, labelEvery: true, label: "2/4 is right here…" } },
           caption: "…and 1/2 is ALSO right here. Same location on the line.",
         },
@@ -75,9 +75,10 @@
         practice: [
           {
             prompt: "Which fraction is at the same spot as 1/2?",
+            viz: { type: "fractionNumline", params: { denom: 6, markAt: 3, labelEvery: true } },
             options: ["1/3", "3/6", "2/3"],
             answer: "3/6",
-            hint: "The 3rd tick of 6 is the middle — same as 1/2.",
+            hint: "1/2 is halfway. Which tick is halfway along this line?",
           },
           {
             prompt: "1/4 lives at the same spot as which?",
@@ -95,30 +96,34 @@
         emoji: "🚶",
         idea: {
           hook: "Fractions don't stop at 1. If you keep walking, 5/4 is one whole step PLUS one more fourth. It's bigger than 1.",
-          viz: { type: "numberLine", params: { min: 0, max: 2, at: 1, label: "0 ··· 1 ··· 2" } },
-          caption: "Imagine ticks between 1 and 2 — that's where fractions bigger than 1 live.",
+          viz: { type: "fractionNumline", params: { denom: 4, max: 2, markAt: 5, labelEvery: true, label: "5/4 lands just past 1" } },
+          caption: "The ticks keep the same size after 1. 5/4 is one full step plus one more fourth.",
         },
         watchMe: [
           { text: "We'll find 5/4. That means 5 jumps of a fourth.",
-            viz: { type: "fractionNumline", params: { denom: 4, labelEvery: true } } },
+            viz: { type: "fractionNumline", params: { denom: 4, max: 2, labelEvery: true } } },
           { text: "Jump 1, 2, 3, 4 — now we're at 1. Still one jump to go.",
-            viz: { type: "fractionNumline", params: { denom: 4, markAt: 4, labelEvery: true, label: "4/4 = 1" } } },
+            viz: { type: "fractionNumline", params: { denom: 4, max: 2, markAt: 4, labelEvery: true } },
+            equation: "4/4 = 1" },
           { text: "Keep the same tick-size going past 1. One more jump lands us at 5/4.",
+            viz: { type: "fractionNumline", params: { denom: 4, max: 2, markAt: 5, labelEvery: true } },
             equation: "5/4 = 1 and 1/4" },
           { text: "So 5/4 is one whole plus a fourth. It's more than 1 but less than 2." },
         ],
         practice: [
           {
             prompt: "Is 7/4 bigger or smaller than 1?",
+            viz: { type: "fractionNumline", params: { denom: 4, max: 2, markAt: 7, labelEvery: true } },
             options: ["bigger", "smaller", "equal"],
             answer: "bigger",
-            hint: "4/4 already equals 1. 7/4 has three extra fourths on top.",
+            hint: "Look at where 7/4 lands. Is it before, at, or past the 1?",
           },
           {
-            prompt: "Which number is 3/2 closest to?",
+            prompt: "Which whole number is 5/4 closest to?",
+            viz: { type: "fractionNumline", params: { denom: 4, max: 2, markAt: 5, labelEvery: true } },
             options: ["0", "1", "2"],
-            answer: "2",
-            hint: "3/2 is 1 and a half. Halfway between 1 and 2.",
+            answer: "1",
+            hint: "Look where 5/4 lands. Which whole number — 0, 1, or 2 — is it closest to?",
           },
         ],
       },

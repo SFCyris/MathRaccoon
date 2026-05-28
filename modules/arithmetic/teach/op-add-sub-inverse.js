@@ -52,6 +52,7 @@
           },
           {
             prompt: "If 6 + 3 = 9, what is 9 − 3?",
+            viz: { type: "barModel", params: { whole: 9, parts: [{ value: 3, label: "3" }, { value: 6, label: "?" }] } },
             options: [5, 6, 7],
             answer: 6,
             hint: "Subtracting 3 undoes adding 3.",
@@ -87,12 +88,14 @@
         practice: [
           {
             prompt: "The family is 2, 7, 9. Which sentence is NOT in this family?",
+            viz: { type: "factFamily", params: { a: 2, b: 7, product: 9, op: "+", revealCount: 0 } },
             options: ["2 + 7 = 9", "9 − 7 = 2", "9 + 2 = 11"],
             answer: "9 + 2 = 11",
             hint: "Every sentence in the family uses all three numbers: 2, 7, 9.",
           },
           {
             prompt: "If 4 + 8 = 12 is in the family, what subtraction sentence belongs?",
+            viz: { type: "factFamily", params: { a: 4, b: 8, product: 12, op: "+", revealCount: 1 } },
             options: ["12 − 4 = 8", "8 − 4 = 4", "12 − 10 = 2"],
             answer: "12 − 4 = 8",
           },
@@ -129,6 +132,7 @@
           },
           {
             prompt: "? − 3 = 5. What number did we start with?",
+            viz: { type: "barModel", params: { parts: [{ value: 3, label: "3" }, { value: 5, label: "5" }] } },
             options: [2, 7, 8],
             answer: 8,
             hint: "If taking 3 away leaves 5, we started with 5 + 3.",

@@ -34,7 +34,16 @@
 
   // ---- numberLine ----
   register("numberLine", function (params = {}) {
-    const { min = 0, max = 10, at = null, hops = [], visited = [], label = null, dir = "up" } = params;
+    const { min = 0, max = 10, at = null, hops = [], marks = [], visited = [], label = null, dir = "up" } = params;
+    // `marks` semantic differs from `hops`:
+    //   - `hops`: each value gets a chained ARC drawn from (value − step) → value.
+    //     Right for skip-counting where each hop represents a STEP.
+    //   - `marks`: each value gets a standalone DOWN-ARROW from above. Right
+    //     for "highlight this range of values" semantics (e.g. all numbers
+    //     that round to 50). Doesn't imply chaining or motion between values.
+    //   When the caller passes `marks: [45..54]` we render each as an
+    //   independent arrow — no spurious chain dragging the leftmost arc
+    //   back to the (value − 1) origin.
     // `step` is the size of each hop (e.g. 5 for skip-count by 5s). If the
     // caller doesn't pass it, infer from the gap between consecutive hops
     // when there are ≥2 with a consistent spacing — that covers every
@@ -64,14 +73,33 @@
               font-size="14" font-weight="700" fill="${color}">${v}</text>
       </g>`);
     }
-    const hopArcs = hops.map((hopTo) => {
+    // Each hop is grouped + given an animation-delay so they appear in order
+    // — matching how a teacher would point at them ("first hop, then this one,
+    // then this one"). The CSS `tv-hop-draw` keyframe in animations.css fades
+    // the arc in with a small grow; calm-mode disables it globally.
+    const hopArcs = hops.map((hopTo, hopIdx) => {
       const from = dir === "up" ? hopTo - hopStep : hopTo + hopStep;
       const fx = pad + (from - min) * step;
       const tx = pad + (hopTo - min) * step;
       const mx = (fx + tx) / 2;
-      return `<path d="M${fx} 44 Q ${mx} 4 ${tx} 44" stroke="#ff7a93" stroke-width="2.5"
+      const delay = 200 + hopIdx * 280;
+      return `<g class="nl-hop" style="animation-delay:${delay}ms">
+        <path d="M${fx} 44 Q ${mx} 4 ${tx} 44" stroke="#ff7a93" stroke-width="2.5"
                fill="none" stroke-dasharray="4 4" stroke-linecap="round"/>
-             <polygon points="${tx - 4},44 ${tx + 4},44 ${tx},52" fill="#ff7a93"/>`;
+        <polygon points="${tx - 4},44 ${tx + 4},44 ${tx},52" fill="#ff7a93"/>
+      </g>`;
+    }).join("");
+    // marks: standalone down-arrows at each value. Each arrow is animated
+    // in left-to-right via the same nl-hop class + delay so the eye traces
+    // the range as the teacher would "point and count."
+    const markArrows = marks.map((markAt, markIdx) => {
+      const x = pad + (markAt - min) * step;
+      const delay = 200 + markIdx * 120;
+      return `<g class="nl-hop" style="animation-delay:${delay}ms">
+        <line x1="${x}" y1="22" x2="${x}" y2="48" stroke="#ff7a93" stroke-width="2.5"
+              stroke-dasharray="3 3" stroke-linecap="round"/>
+        <polygon points="${x - 4},44 ${x + 4},44 ${x},52" fill="#ff7a93"/>
+      </g>`;
     }).join("");
     const marker = at != null
       ? `<g transform="translate(${pad + (at - min) * step} 22)">
@@ -86,6 +114,7 @@
       <line x1="${pad}" y1="44" x2="${width - pad}" y2="44" stroke="#c4b5fd" stroke-width="2"/>
       ${ticks.join("")}
       ${hopArcs}
+      ${markArrows}
       ${marker}
       ${label ? `<text x="${width / 2}" y="92" text-anchor="middle" font-family="Nunito, sans-serif"
                    font-size="13" fill="#6b5b95" font-weight="700">${label}</text>` : ""}
@@ -194,6 +223,168 @@
     return wrap;
   });
 
+  // ---- breakApartArray (interactive: kid splits an N×M array along a row line) ----
+  //
+  // Why this exists
+  // ---------------
+  // The distributive property is fundamentally visual: kids learn
+  // 6 × 8 = (5 × 8) + (1 × 8) by SEEING the 6×8 array cut into two pieces.
+  // The static "array" viz shows 48 dots in a wall — the partition is left
+  // to the kid's imagination, which fails for autism-spectrum and challenged
+  // learners who need the cut to be CONCRETE and KINESTHETIC.
+  //
+  // This viz lets the kid TAP a gap between any two rows to set the split.
+  // The two regions color-code (top = IN-blue, bottom = OUT-mint), a side
+  // readout shows each piece's product and the sum below shows the
+  // distributive recombination. The "splitTarget" param marks the intended
+  // split for the question — but mirror splits (top↔bottom flipped) are
+  // accepted as equivalent because 5+1 and 1+5 partition the same total.
+  //
+  // Params
+  // ------
+  //   rows, cols:     array dimensions
+  //   splitTarget:    where the question wants the split (1..rows-1).
+  //                   The viz starts there. Tapping moves the line.
+  //   showSum:        when true, the bottom card shows "a + b = N×M".
+  //                   Default true.
+  //   label:          caption shown below the readout
+  //   colorTop:       fill for the top region (default IN-blue #7dd3fc)
+  //   colorBottom:    fill for the bottom region (default OUT-mint #6ee7b7)
+  register("breakApartArray", function ({
+    rows = 6, cols = 8, splitTarget = null, splitAxis = "row",
+    showSum = true, label = null,
+    colorTop = "#7dd3fc", colorBottom = "#6ee7b7",
+  }) {
+    // splitAxis "row": cut horizontally → top/bottom regions, max split = rows
+    // splitAxis "col": cut vertically   → left/right regions, max split = cols
+    const isRow = splitAxis !== "col";
+    const axisCount = isRow ? rows : cols;
+    const target = (Number.isInteger(splitTarget) && splitTarget >= 1 && splitTarget < axisCount)
+      ? splitTarget
+      : Math.floor(axisCount / 2);
+    const cell = 34;
+    const padX = 6, padY = 6;
+    const gridW = cols * cell + padX * 2;
+    const gridH = rows * cell + padY * 2;
+    // Split lines live BETWEEN rows (or columns). With N items there are N-1
+    // gap positions. We render each as an invisible click-target band so the
+    // kid can tap between any two rows/cols to move the split there.
+    function buildSvg(currentSplit) {
+      const dots = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const cx = padX + c * cell + cell / 2;
+          const cy = padY + r * cell + cell / 2;
+          // For row-axis split: dots in rows < split are "top" color.
+          // For col-axis split: dots in cols < split are "left" color.
+          const inFirst = isRow ? (r < currentSplit) : (c < currentSplit);
+          const fill = inFirst ? colorTop : colorBottom;
+          dots.push(`<circle cx="${cx}" cy="${cy}" r="12"
+            fill="${fill}" stroke="#6b5b95" stroke-width="1.5"/>`);
+          dots.push(`<circle cx="${cx - 3}" cy="${cy - 3}" r="4"
+            fill="#fff" opacity="0.45"/>`);
+        }
+      }
+      // The visible split line — thick dashed divider, oriented per axis
+      let splitLine;
+      if (isRow) {
+        const lineY = padY + currentSplit * cell;
+        splitLine = `<line class="ba-split-line"
+          x1="${padX - 2}" y1="${lineY}" x2="${gridW - padX + 2}" y2="${lineY}"
+          stroke="#3a2e5f" stroke-width="3.5" stroke-dasharray="6 4"/>`;
+      } else {
+        const lineX = padX + currentSplit * cell;
+        splitLine = `<line class="ba-split-line"
+          x1="${lineX}" y1="${padY - 2}" x2="${lineX}" y2="${gridH - padY + 2}"
+          stroke="#3a2e5f" stroke-width="3.5" stroke-dasharray="6 4"/>`;
+      }
+      // Invisible click bands between each adjacent row/col pair
+      const bands = [];
+      for (let g = 1; g < axisCount; g++) {
+        if (isRow) {
+          const y = padY + g * cell - cell / 2;
+          bands.push(`<rect class="ba-gap-band" data-split="${g}"
+            x="0" y="${y}" width="${gridW}" height="${cell}"
+            fill="transparent" style="cursor: pointer"/>`);
+        } else {
+          const x = padX + g * cell - cell / 2;
+          bands.push(`<rect class="ba-gap-band" data-split="${g}"
+            x="${x}" y="0" width="${cell}" height="${gridH}"
+            fill="transparent" style="cursor: pointer"/>`);
+        }
+      }
+      const ariaAxis = isRow ? "row" : "column";
+      return `<svg viewBox="0 0 ${gridW} ${gridH}" role="img"
+        aria-label="${rows} by ${cols} array, split at ${ariaAxis} ${currentSplit}">
+        ${dots.join("")}
+        ${splitLine}
+        ${bands.join("")}
+      </svg>`;
+    }
+    function buildReadout(currentSplit) {
+      // For row-axis: "Top" / "Bottom" are the visual orientation labels.
+      //                Each piece is (split × cols) and ((rows-split) × cols).
+      // For col-axis: "Left" / "Right" labels. Each piece is (rows × split)
+      //                and (rows × (cols-split)).
+      let firstLabel, secondLabel, firstEq, secondEq, firstProd, secondProd;
+      if (isRow) {
+        firstLabel  = "Top";
+        secondLabel = "Bottom";
+        firstProd  = currentSplit * cols;
+        secondProd = (rows - currentSplit) * cols;
+        firstEq    = `${currentSplit} × ${cols} = ${firstProd}`;
+        secondEq   = `${rows - currentSplit} × ${cols} = ${secondProd}`;
+      } else {
+        firstLabel  = "Left";
+        secondLabel = "Right";
+        firstProd  = rows * currentSplit;
+        secondProd = rows * (cols - currentSplit);
+        firstEq    = `${rows} × ${currentSplit} = ${firstProd}`;
+        secondEq   = `${rows} × ${cols - currentSplit} = ${secondProd}`;
+      }
+      const total = rows * cols;
+      const sumCard = showSum
+        ? `<div class="ba-sum">${firstProd} + ${secondProd} = ${total}</div>`
+        : "";
+      return `
+        <div class="ba-readout">
+          <div class="ba-piece ba-piece-top">
+            <span class="ba-piece-label">${firstLabel}:</span>
+            <span class="ba-piece-eq">${firstEq}</span>
+          </div>
+          <div class="ba-piece ba-piece-bottom">
+            <span class="ba-piece-label">${secondLabel}:</span>
+            <span class="ba-piece-eq">${secondEq}</span>
+          </div>
+          ${sumCard}
+        </div>`;
+    }
+    const wrap = h("div", { class: "teach-viz teach-break-apart" });
+    wrap.dataset.split = String(target);
+    wrap.dataset.target = String(target);
+    function render(split) {
+      wrap.dataset.split = String(split);
+      wrap.innerHTML = `
+        <div class="ba-grid" style="--top-color:${colorTop}; --bottom-color:${colorBottom};">
+          ${buildSvg(split)}
+        </div>
+        ${buildReadout(split)}
+        ${label ? `<div class="ba-label">${label}</div>` : ""}
+      `;
+      // Wire interactivity AFTER DOM is in place
+      wrap.querySelectorAll(".ba-gap-band").forEach((band) => {
+        band.addEventListener("click", (e) => {
+          const newSplit = parseInt(band.getAttribute("data-split"), 10);
+          if (Number.isInteger(newSplit)) render(newSplit);
+        });
+        // Touch support — same handler is fine since click fires on tap.
+        band.addEventListener("touchstart", (e) => { e.preventDefault(); band.click(); }, { passive: false });
+      });
+    }
+    render(target);
+    return wrap;
+  });
+
   // ---- array (m rows × n cols of dots) ----
   register("array", function ({ rows = 3, cols = 4, color = "#a78bfa", label = null }) {
     const cell = 34;
@@ -268,17 +459,59 @@
   // Accepts either `num` or `numer` for the numerator — older op files use
   // both spellings, and silently defaulting to 1 used to hide the mismatch
   // (1/2 rendered correctly but 2/4, 4/8, etc. still only shaded 1 cell).
+  //
+  // Multi-whole mode
+  // ----------------
+  // When `wholes: N` (N >= 2) is passed, the viz renders N FULL bars side-by-
+  // side (each uncut, denom=1, fully shaded). This is the right rendering for
+  // teaching "whole numbers are fractions too" — the kid needs to SEE N whole
+  // bars to understand that 5 wholes = 5/1, not infer it from one bar with a
+  // misleading "another 1" label.
   register("fractionBar", function (params = {}) {
-    const { denom = 4, color = "#ff7a93", label = null } = params;
+    const { denom = 4, color = "#ff7a93", label = null, wholes = null } = params;
     const num = params.num != null ? params.num
               : params.numer != null ? params.numer
               : 1;
+
+    // Multi-whole rendering: N uncut bars side-by-side.
+    if (Number.isInteger(wholes) && wholes >= 2) {
+      const totalW = 360, gap = 6, padX = 2;
+      const barH = 60;
+      const barW = (totalW - padX * 2 - gap * (wholes - 1)) / wholes;
+      const bars = [];
+      for (let i = 0; i < wholes; i++) {
+        const x = padX + i * (barW + gap);
+        // Stagger so the kid SEES each whole bar appear in turn — same
+        // animation language as the single-bar shading.
+        const delay = 200 + i * 220;
+        bars.push(`<rect class="fb-shade" style="animation-delay:${delay}ms"
+          x="${x}" y="0" width="${barW}" height="${barH}"
+          fill="${color}" stroke="#6b5b95" stroke-width="1.5" rx="4"/>`);
+      }
+      const hgt = barH + (label ? 24 : 4);
+      const wrap = h("div", { class: "teach-viz teach-fraction" });
+      wrap.innerHTML = `<svg viewBox="0 0 ${totalW} ${hgt}" role="img" aria-label="${wholes} whole bars">
+        ${bars.join("")}
+        ${label ? `<text x="${totalW/2}" y="${barH + 18}" text-anchor="middle"
+                     font-family="Fredoka, sans-serif" font-size="15" font-weight="800"
+                     fill="#6b5b95">${label}</text>` : ""}
+      </svg>`;
+      return wrap;
+    }
+
     const width = 360, height = 60, pad = 2;
     const segW = (width - pad * 2) / denom;
+    // Shaded segments fade in left-to-right with a staggered delay, so the
+    // visual reads as "we're coloring 3 of 5 pieces" — an action, not a static
+    // diagram. Unshaded segments appear immediately (the bar's structure).
     const segs = [];
     for (let i = 0; i < denom; i++) {
-      segs.push(`<rect x="${pad + i * segW}" y="0" width="${segW}" height="${height}"
-        fill="${i < num ? color : "#fff"}" stroke="#6b5b95" stroke-width="1.5"/>`);
+      const shaded = i < num;
+      const cls = shaded ? "fb-shade" : "fb-empty";
+      const delay = shaded ? 200 + i * 220 : 0;
+      const styleAttr = shaded ? ` style="animation-delay:${delay}ms"` : "";
+      segs.push(`<rect class="${cls}"${styleAttr} x="${pad + i * segW}" y="0" width="${segW}" height="${height}"
+        fill="${shaded ? color : "#fff"}" stroke="#6b5b95" stroke-width="1.5"/>`);
     }
     const hgt = height + (label ? 24 : 4);
     const wrap = h("div", { class: "teach-viz teach-fraction" });
@@ -317,6 +550,225 @@
     const children = [h("div", { class: "teach-eg-row" }, slots)];
     if (label) children.push(h("div", { class: "teach-eg-label" }, label));
     return h("div", { class: "teach-viz teach-equalgroups" }, children);
+  });
+
+  // ---- functionTable (Function Machine + IN/OUT table for stages A–E) ----
+  //
+  // The whole point of this viz is that one consistent picture carries the
+  // instruction across every stage of a function-table lesson. The machine
+  // externalises the *rule* (literal, mechanical); the table externalises the
+  // *pattern* across rows. Colour is used as language: IN is one colour, OUT
+  // is another, the rule is a third, and any unknown slot is the coral "?".
+  //
+  // Params:
+  //   rule:    { op: "+"|"−"|"×"|"÷", n: 3 }   — null/omit ⇒ rule unknown (Stage D)
+  //   rows:    [{ in: 1, out: 4 }, ...]        — null cell ⇒ "?" (Stages B, C, E)
+  //   activeRowIdx: number                     — which row gets the highlight band
+  //   machine: { in: 3, out: 6, showOut: bool } — what's in the machine slots
+  //                                              (showOut:false ⇒ OUT slot blank)
+  //   autoPlay: bool                           — Stage A: cycle through rows on a timer
+  //   caption: string
+  register("functionTable", function (params = {}) {
+    const {
+      rule = null,
+      rows = [],
+      activeRowIdx = null,
+      machine = null,
+      autoPlay = false,
+      caption = null,
+    } = params;
+
+    // Colour language — these MUST stay consistent across every appearance
+    // in the app so children learn to read the colour, not just the label.
+    const C_IN   = "#7dd3fc";  // sky blue   — input
+    const C_OUT  = "#6ee7b7";  // mint       — output
+    const C_RULE = "#ffd93d";  // sun yellow — rule
+    const C_UNK  = "#ff7a93";  // coral      — unknown / missing
+    const C_INK  = "#6b5b95";
+
+    const ruleText = rule
+      ? `${rule.op} ${rule.n}`
+      : "?";
+    const ruleColor = rule ? C_RULE : C_UNK;
+
+    // A slot is "unknown" when its value is explicitly null/"?" (Stages C/E).
+    // Unknown slots paint coral so the colour language stays consistent with
+    // unknown cells in the table — coral always = "this is what we're solving for".
+    const machineInRaw  = machine ? machine.in  : null;
+    const machineOutRaw = machine ? machine.out : null;
+    const inIsKnown  = machine && machineInRaw !== null && machineInRaw !== undefined && machineInRaw !== "?";
+    const outIsShownAndKnown = machine && machine.showOut && machineOutRaw !== null && machineOutRaw !== undefined && machineOutRaw !== "?";
+    const machineIn  = inIsKnown ? machineInRaw : (machine ? "?" : "");
+    const machineOut = outIsShownAndKnown ? machineOutRaw
+                       : (machine && machine.showOut ? "?" : "");
+    const inFill  = machine ? (inIsKnown ? C_IN : C_UNK) : "#fff";
+    const outFill = machine && machine.showOut ? (outIsShownAndKnown ? C_OUT : C_UNK) : "#fff";
+
+    // ---- Machine SVG (left) -------------------------------------------------
+    // 320×200 viewBox. IN slot left, rule box centre, OUT slot right.
+    const machineSvg = `
+      <svg viewBox="0 0 320 200" role="img" aria-label="Function machine"
+           class="ft-machine-svg">
+        <!-- Conveyor base -->
+        <rect x="10" y="120" width="300" height="14" rx="6"
+              fill="#efeafd" stroke="${C_INK}" stroke-width="1.5"/>
+        <!-- IN slot -->
+        <g class="ft-in-tile">
+          <rect x="18" y="56" width="64" height="64" rx="10"
+                fill="${inFill}" stroke="${C_INK}" stroke-width="2.5"/>
+          <text x="50" y="98" text-anchor="middle"
+                font-family="Fredoka, sans-serif" font-size="32"
+                font-weight="800" fill="${C_INK}">${machineIn}</text>
+          <text x="50" y="40" text-anchor="middle"
+                font-family="Fredoka, sans-serif" font-size="13"
+                font-weight="800" fill="${C_INK}">IN</text>
+        </g>
+        <!-- Arrow into machine -->
+        <g>
+          <line x1="88" y1="88" x2="118" y2="88" stroke="${C_INK}" stroke-width="3"/>
+          <polygon points="118,82 128,88 118,94" fill="${C_INK}"/>
+        </g>
+        <!-- Rule box (the machine itself) -->
+        <g class="ft-rule-box ${rule ? "" : "ft-rule-unknown"}">
+          <rect x="130" y="38" width="80" height="100" rx="14"
+                fill="${ruleColor}" stroke="${C_INK}" stroke-width="3"/>
+          <!-- little gears on top to read as "machine" -->
+          <circle cx="148" cy="32" r="6" fill="${C_INK}"/>
+          <circle cx="170" cy="28" r="7" fill="${C_INK}"/>
+          <circle cx="192" cy="32" r="6" fill="${C_INK}"/>
+          <text x="170" y="98" text-anchor="middle"
+                font-family="Fredoka, sans-serif" font-size="26"
+                font-weight="900" fill="${C_INK}">${ruleText}</text>
+          <text x="170" y="156" text-anchor="middle"
+                font-family="Fredoka, sans-serif" font-size="13"
+                font-weight="800" fill="${C_INK}">RULE</text>
+        </g>
+        <!-- Arrow out of machine -->
+        <g>
+          <line x1="216" y1="88" x2="246" y2="88" stroke="${C_INK}" stroke-width="3"/>
+          <polygon points="246,82 256,88 246,94" fill="${C_INK}"/>
+        </g>
+        <!-- OUT slot -->
+        <g class="ft-out-tile">
+          <rect x="248" y="56" width="64" height="64" rx="10"
+                fill="${outFill}" stroke="${C_INK}" stroke-width="2.5"/>
+          <text x="280" y="98" text-anchor="middle"
+                font-family="Fredoka, sans-serif" font-size="32"
+                font-weight="800" fill="${C_INK}">${machineOut}</text>
+          <text x="280" y="40" text-anchor="middle"
+                font-family="Fredoka, sans-serif" font-size="13"
+                font-weight="800" fill="${C_INK}">OUT</text>
+        </g>
+      </svg>`;
+
+    // ---- Table SVG (right) --------------------------------------------------
+    // Two columns IN | OUT. Rows render with cell value or "?" if null.
+    // Active row gets a soft yellow band behind it.
+    const rowH = 36;
+    const tablePadTop = 38;
+    const tableW = 200;
+    const tableH = tablePadTop + Math.max(1, rows.length) * rowH + 8;
+    const colX = [50, 150]; // centres of IN and OUT columns
+
+    const headerRow = `
+      <rect x="4" y="6" width="${tableW - 8}" height="26" rx="6"
+            fill="#fff" stroke="${C_INK}" stroke-width="2"/>
+      <text x="${colX[0]}" y="24" text-anchor="middle"
+            font-family="Fredoka, sans-serif" font-size="14"
+            font-weight="800" fill="${C_INK}">IN</text>
+      <text x="${colX[1]}" y="24" text-anchor="middle"
+            font-family="Fredoka, sans-serif" font-size="14"
+            font-weight="800" fill="${C_INK}">OUT</text>
+      <line x1="100" y1="6" x2="100" y2="${tableH - 4}"
+            stroke="${C_INK}" stroke-width="1.5" opacity="0.4"/>`;
+
+    const rowParts = rows.map((r, i) => {
+      const y = tablePadTop + i * rowH;
+      const isActive = activeRowIdx === i;
+      const band = isActive
+        ? `<rect x="4" y="${y - 2}" width="${tableW - 8}" height="${rowH}" rx="6"
+                 fill="#fff4d6" opacity="0.9"/>`
+        : "";
+      const rowDim = (activeRowIdx != null && !isActive) ? ' opacity="0.55"' : "";
+
+      const inIsUnknown = r.in === null || r.in === undefined;
+      const outIsUnknown = r.out === null || r.out === undefined;
+      const inFill = inIsUnknown ? C_UNK : C_IN;
+      const outFill = outIsUnknown ? C_UNK : C_OUT;
+
+      return `
+        ${band}
+        <g${rowDim}>
+          <rect x="14" y="${y}" width="72" height="${rowH - 8}" rx="6"
+                fill="${inFill}" stroke="${C_INK}" stroke-width="1.5"
+                opacity="${inIsUnknown ? 0.85 : 0.85}"/>
+          <text x="${colX[0]}" y="${y + rowH/2 + 1}" text-anchor="middle"
+                font-family="Fredoka, sans-serif" font-size="18"
+                font-weight="800" fill="${C_INK}">${inIsUnknown ? "?" : r.in}</text>
+          <rect x="114" y="${y}" width="72" height="${rowH - 8}" rx="6"
+                fill="${outFill}" stroke="${C_INK}" stroke-width="1.5"
+                opacity="${outIsUnknown ? 0.85 : 0.85}"/>
+          <text x="${colX[1]}" y="${y + rowH/2 + 1}" text-anchor="middle"
+                font-family="Fredoka, sans-serif" font-size="18"
+                font-weight="800" fill="${C_INK}">${outIsUnknown ? "?" : r.out}</text>
+        </g>`;
+    }).join("");
+
+    const tableSvg = `
+      <svg viewBox="0 0 ${tableW} ${tableH}" role="img"
+           aria-label="Function table" class="ft-table-svg">
+        <rect x="2" y="2" width="${tableW - 4}" height="${tableH - 4}" rx="10"
+              fill="#fff" stroke="${C_INK}" stroke-width="2.5"/>
+        ${headerRow}
+        ${rowParts}
+      </svg>`;
+
+    // ---- Compose ------------------------------------------------------------
+    const wrap = h("div", { class: "teach-viz teach-functiontable" });
+    wrap.innerHTML = `
+      <div class="ft-stage">
+        <div class="ft-machine">${machineSvg}</div>
+        <div class="ft-table">${tableSvg}</div>
+      </div>
+      ${caption ? `<div class="ft-caption">${caption}</div>` : ""}
+    `;
+
+    // ---- Auto-play (Stage A: machine runs autonomously) --------------------
+    // Cycles activeRowIdx through the rows on a fixed cadence. Same duration
+    // every step — predictability is the instruction here, not flair.
+    if (autoPlay && rows.length > 0) {
+      const machineEl = wrap.querySelector(".ft-machine");
+      const tableEl = wrap.querySelector(".ft-table");
+      const stepMs = 1400;
+      let cur = 0;
+      const tick = () => {
+        if (!wrap.isConnected) return; // viz was unmounted; stop cycling
+        const r = rows[cur];
+        // Re-render with the active row + machine in/out reflecting it.
+        // We do this by re-invoking the renderer — cheapest and avoids drift.
+        const next = window.MR.Viz.render({
+          type: "functionTable",
+          params: {
+            rule, rows, activeRowIdx: cur,
+            machine: { in: r.in, out: r.out, showOut: true },
+            autoPlay: false, // child render must not loop
+            caption: null,
+          },
+        });
+        // Swap just the stage contents to avoid losing the caption underneath.
+        const newStage = next.querySelector(".ft-stage");
+        const oldStage = wrap.querySelector(".ft-stage");
+        if (newStage && oldStage) oldStage.replaceWith(newStage);
+        cur = (cur + 1) % rows.length;
+      };
+      // Kick off shortly after mount so the initial frame is visible first.
+      setTimeout(() => {
+        tick();
+        wrap._ftTimer = setInterval(tick, stepMs);
+      }, 600);
+    }
+
+    return wrap;
   });
 
   // ---- shapeGrid (display polygons) ----
@@ -417,11 +869,21 @@
     const hy = cy + Math.sin(hourA) * (r * 0.55);
     const mx = cx + Math.cos(minA) * (r * 0.78);
     const my = cy + Math.sin(minA) * (r * 0.78);
+    // Hands sweep from 12 to their target position via CSS rotation. The
+    // hourDeg / minuteDeg vars tell the keyframe where to land. The kid sees
+    // time *progressing* into place, not just appearing — matches the mental
+    // model of a clock ticking forward.
+    const hourDeg = (hour % 12) * 30 + (minute / 60) * 30;
+    const minDeg = minute * 6;
     return `<svg viewBox="0 0 180 ${label ? 200 : 180}" role="img" aria-label="Clock showing ${hour}:${String(minute).padStart(2,"0")}">
       <circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff8ed" stroke="#6b5b95" stroke-width="3"/>
       ${ticks.join("")}
-      <line x1="${cx}" y1="${cy}" x2="${hx}" y2="${hy}" stroke="#3a2e5f" stroke-width="5" stroke-linecap="round"/>
-      <line x1="${cx}" y1="${cy}" x2="${mx}" y2="${my}" stroke="${accent}" stroke-width="3.5" stroke-linecap="round"/>
+      <g class="clock-hour-hand" style="--hand-deg:${hourDeg}deg; transform-origin:${cx}px ${cy}px;">
+        <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - r * 0.55}" stroke="#3a2e5f" stroke-width="5" stroke-linecap="round"/>
+      </g>
+      <g class="clock-min-hand" style="--hand-deg:${minDeg}deg; transform-origin:${cx}px ${cy}px;">
+        <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - r * 0.78}" stroke="${accent}" stroke-width="3.5" stroke-linecap="round"/>
+      </g>
       <circle cx="${cx}" cy="${cy}" r="5" fill="#3a2e5f"/>
       ${label ? `<text x="${cx}" y="196" text-anchor="middle" font-family="Fredoka, sans-serif"
                    font-size="15" font-weight="800" fill="#6b5b95">${label}</text>` : ""}
@@ -516,18 +978,55 @@
 
   // ---- barChart (simple data bars) ----
   register("barChart", function ({ bars = [], yMax = null, label = null }) {
-    const width = 440, height = 180, pad = 28;
+    // pad bumped from 28 → 36 so 2-digit y-axis labels fit comfortably
+    // ("10", "20") without crowding the y-axis line.
+    const width = 440, height = 180, pad = 36;
     const max = yMax || Math.max(...bars.map((b) => b.value || 0), 1);
     const colors = ["#a78bfa", "#ff7a93", "#6ee7b7", "#ffd93d", "#7dd3fc", "#ffb077"];
     const slotW = (width - pad * 2) / bars.length;
     const barW = Math.min(48, slotW * 0.65);
+    const chartH = height - pad * 2;
+
+    // Decide y-axis step so the grid doesn't get cluttered. For 3rd-grade
+    // content max is usually small (≤ 20), so step=1 is the typical case —
+    // every integer gets a grid line and a number label, which is exactly
+    // what the audit asked for: kids can read bar heights directly off the
+    // axis instead of comparing the bar top against a tiny floating number.
+    let yStep = 1;
+    if (max > 50) yStep = 10;
+    else if (max > 20) yStep = 5;
+    else if (max > 10) yStep = 2;
+
+    // Build horizontal grid lines + y-axis labels. Grid lines are drawn FIRST
+    // (= behind the bars) and use a very light lilac so the bars stay visually
+    // dominant. The y=0 line is omitted because the x-axis itself marks it.
+    const gridParts = [];
+    for (let v = 0; v <= max; v += yStep) {
+      const y = height - pad - (v / max) * chartH;
+      if (v > 0) {
+        gridParts.push(
+          `<line x1="${pad}" y1="${y}" x2="${width - pad}" y2="${y}"
+                 stroke="#e9defc" stroke-width="1"/>`
+        );
+      }
+      gridParts.push(
+        `<text x="${pad - 6}" y="${y + 4}" text-anchor="end"
+               font-family="Fredoka, sans-serif" font-size="11"
+               font-weight="700" fill="#6b5b95">${v}</text>`
+      );
+    }
+
+    // Each bar grows up from the baseline (CSS animation: tv-bar-rise scales
+    // the rect from 0→1 with transform-origin: bottom). We add per-bar delay
+    // inline so bars rise left-to-right, building the chart visibly.
     const segs = bars.map((b, i) => {
-      const h_ = Math.round((b.value / max) * (height - pad * 2));
+      const h_ = Math.round((b.value / max) * chartH);
       const x = pad + i * slotW + (slotW - barW) / 2;
       const y = height - pad - h_;
       const c = b.color || colors[i % colors.length];
+      const delay = 200 + i * 160;
       return `<g>
-        <rect x="${x}" y="${y}" width="${barW}" height="${h_}" rx="6" fill="${c}" stroke="#6b5b95" stroke-width="1.5"/>
+        <rect style="animation-delay:${delay}ms" x="${x}" y="${y}" width="${barW}" height="${h_}" rx="6" fill="${c}" stroke="#6b5b95" stroke-width="1.5"/>
         <text x="${x + barW/2}" y="${y - 4}" text-anchor="middle" font-family="Fredoka, sans-serif"
               font-size="13" font-weight="800" fill="#6b5b95">${b.value}</text>
         <text x="${x + barW/2}" y="${height - pad + 16}" text-anchor="middle"
@@ -535,7 +1034,11 @@
       </g>`;
     });
     const wrap = h("div", { class: "teach-viz teach-barchart" });
+    // Render order: grid (lightest, behind) → axes (slightly darker) → bars
+    // (most prominent, animated). Y-axis labels sit to the left of the axis
+    // so they don't interfere with bar contents.
     wrap.innerHTML = `<svg viewBox="0 0 ${width} ${height + 20}" role="img" aria-label="Bar chart">
+      ${gridParts.join("")}
       <line x1="${pad}" y1="${pad}" x2="${pad}" y2="${height - pad}" stroke="#6b5b95" stroke-width="2"/>
       <line x1="${pad}" y1="${height - pad}" x2="${width - pad}" y2="${height - pad}" stroke="#6b5b95" stroke-width="2"/>
       ${segs.join("")}
@@ -547,12 +1050,23 @@
   });
 
   // ---- tally marks ----
+  // Each bundle staggers in left-to-right via the existing teach-eg-item pop
+  // animation pattern — simulates "tallying" rather than appearing static.
   register("tally", function ({ count = 5, label = null }) {
     const bundles = Math.floor(count / 5);
     const rem = count % 5;
     const items = [];
-    for (let b = 0; b < bundles; b++) items.push(h("span", { class: "teach-tally-bundle" }, "卌"));
-    if (rem > 0) items.push(h("span", { class: "teach-tally-bundle" }, "|".repeat(rem)));
+    let idx = 0;
+    for (let b = 0; b < bundles; b++) {
+      const span = h("span", { class: "teach-tally-bundle" }, "卌");
+      span.style.animationDelay = (200 + idx++ * 180) + "ms";
+      items.push(span);
+    }
+    if (rem > 0) {
+      const span = h("span", { class: "teach-tally-bundle" }, "|".repeat(rem));
+      span.style.animationDelay = (200 + idx++ * 180) + "ms";
+      items.push(span);
+    }
     const children = [h("div", { class: "teach-tally-row" }, items)];
     if (label) children.push(h("div", { class: "teach-eg-label" }, label));
     return h("div", { class: "teach-viz teach-tally" }, children);
@@ -599,17 +1113,34 @@
   });
 
   // ---- fractionNumline (fractions on a number line 0..1 with tick marks) ----
-  register("fractionNumline", function ({ denom = 4, markAt = null, labelEvery = true, label = null }) {
+  register("fractionNumline", function ({
+    denom = 4, markAt = null, labelEvery = true, label = null, max = 1,
+  }) {
+    // `max` extends the line past 1 (e.g., max=2 shows 0…1…2 with fraction
+    // ticks throughout). Each whole gets its own labeled endpoint (0, 1, 2)
+    // and the fraction ticks between them carry their fraction names
+    // (1/4, 2/4, 3/4 within 0–1; then 5/4, 6/4, 7/4 within 1–2). This lets
+    // a teach lesson actually SHOW a fraction past 1 instead of asking the
+    // kid to "imagine ticks."
+    const wholes = Math.max(1, max | 0);
+    const totalTicks = denom * wholes;
     const width = 500, pad = 34, y = 44;
-    const step = (width - pad * 2) / denom;
+    const step = (width - pad * 2) / totalTicks;
     const ticks = [];
-    for (let i = 0; i <= denom; i++) {
+    for (let i = 0; i <= totalTicks; i++) {
       const x = pad + i * step;
-      const isEnd = i === 0 || i === denom;
+      const isWholeMultiple = (i % denom === 0);
       ticks.push(`<line x1="${x}" y1="${y - 8}" x2="${x}" y2="${y + 8}"
-                   stroke="#6b5b95" stroke-width="${isEnd ? 3 : 2}"/>`);
-      if (labelEvery || isEnd) {
-        const txt = i === 0 ? "0" : i === denom ? "1" : `${i}/${denom}`;
+                   stroke="#6b5b95" stroke-width="${isWholeMultiple ? 3 : 2}"/>`);
+      if (labelEvery || isWholeMultiple) {
+        let txt;
+        if (isWholeMultiple) {
+          // Label whole-number positions as 0, 1, 2, ...
+          txt = String(i / denom);
+        } else {
+          // Fractional tick — its name is `i/denom`
+          txt = `${i}/${denom}`;
+        }
         ticks.push(`<text x="${x}" y="${y + 26}" text-anchor="middle"
                      font-family="Fredoka, sans-serif" font-size="13" font-weight="700"
                      fill="#6b5b95">${txt}</text>`);
@@ -625,14 +1156,107 @@
               transform="scale(-1 1)">🦝</text>
       </g>`;
     }
+    // SVG height grows to 92 when a label is present so the bottom caption
+    // doesn't overlap the tick labels (which sit at y+26 = 70).
+    const svgH = label ? 92 : 72;
     const wrap = h("div", { class: "teach-viz teach-numline" });
-    wrap.innerHTML = `<svg viewBox="0 0 ${width} 72" role="img" aria-label="Fraction number line">
+    wrap.innerHTML = `<svg viewBox="0 0 ${width} ${svgH}" role="img" aria-label="Fraction number line">
       <line x1="${pad}" y1="${y}" x2="${width - pad}" y2="${y}" stroke="#c4b5fd" stroke-width="2"/>
       ${ticks.join("")}
       ${marker}
-      ${label ? `<text x="${width/2}" y="68" text-anchor="middle" font-family="Fredoka, sans-serif"
+      ${label ? `<text x="${width/2}" y="88" text-anchor="middle" font-family="Fredoka, sans-serif"
                    font-size="13" font-weight="700" fill="#6b5b95">${label}</text>` : ""}
     </svg>`;
+    return wrap;
+  });
+
+  // ---- fractionBarPair (two fractions stacked for comparison) -----------
+  // For "Line Them Up" pedagogy: render TWO same-length bars, each shaded
+  // to a different fraction, stacked vertically so the kid can compare
+  // shaded lengths by eye. The longer-shaded bar is the bigger fraction.
+  //
+  // Without this primitive, the "compare two fractions" pedagogy collapses
+  // because the existing fractionBar can only show one fraction at a time —
+  // forcing the lesson to ask the kid to "imagine" the second bar.
+  register("fractionBarPair", function ({
+    top = { numer: 1, denom: 2 }, bottom = { numer: 1, denom: 3 },
+    topLabel = null, bottomLabel = null, label = null,
+    topColor = "#ff7a93", bottomColor = "#7dd3fc",
+  }) {
+    const width = 360, barH = 50, pad = 2, gap = 26;
+    const labelW = 60; // left gutter for fraction labels
+    const barW = width - pad * 2 - labelW;
+    function buildBar(spec, color, y, lbl) {
+      const denom = Math.max(1, spec.denom | 0);
+      const numer = Math.max(0, Math.min(denom, spec.numer | 0));
+      const segW = barW / denom;
+      const segs = [];
+      for (let i = 0; i < denom; i++) {
+        const shaded = i < numer;
+        segs.push(`<rect x="${pad + labelW + i * segW}" y="${y}" width="${segW}" height="${barH}"
+          fill="${shaded ? color : "#fff"}" stroke="#6b5b95" stroke-width="1.5"/>`);
+      }
+      const labelText = lbl != null ? lbl : `${numer}/${denom}`;
+      const labelSvg = `<text x="${pad + labelW - 8}" y="${y + barH / 2 + 6}" text-anchor="end"
+        font-family="Fredoka, sans-serif" font-size="18" font-weight="800"
+        fill="#3a2e5f">${labelText}</text>`;
+      return labelSvg + segs.join("");
+    }
+    const topSvg = buildBar(top, topColor, pad, topLabel);
+    const bottomSvg = buildBar(bottom, bottomColor, pad + barH + gap, bottomLabel);
+    const totalH = pad * 2 + barH * 2 + gap + (label ? 22 : 0);
+    const wrap = h("div", { class: "teach-viz teach-fraction teach-fraction-pair" });
+    wrap.innerHTML = `<svg viewBox="0 0 ${width} ${totalH}" role="img"
+        aria-label="Compare ${top.numer}/${top.denom} and ${bottom.numer}/${bottom.denom}">
+      ${topSvg}
+      ${bottomSvg}
+      ${label ? `<text x="${width/2}" y="${totalH - 4}" text-anchor="middle"
+                   font-family="Fredoka, sans-serif" font-size="14" font-weight="700"
+                   fill="#6b5b95">${label}</text>` : ""}
+    </svg>`;
+    return wrap;
+  });
+
+  // ---- skipCountPicto (icons with cumulative skip-count beneath) ----
+  //
+  // Pedagogy: for any "each icon = N, row has K icons, how many?" question,
+  // this viz shows the row of K icons with the cumulative count beneath each
+  // (N, 2N, 3N, …, KN). The kid SEES the skip-count pattern that maps to the
+  // multiplication answer. Reinforces CCSS 3.MD.B.3 (pictograph reading) +
+  // 3.OA.9 (arithmetic patterns) in one picture.
+  //
+  // Params:
+  //   icon:   the emoji to repeat (e.g. "🐝")
+  //   scale:  what each icon represents (e.g. 3 bees per icon)
+  //   count:  how many icons in the row (e.g. 6)
+  //   label:  optional caption below the row
+  register("skipCountPicto", function ({ icon = "🐝", scale = 3, count = 6, label = null, showTally = true }) {
+    const wrap = h("div", { class: "teach-viz teach-skipcountpicto" });
+    // Each cell has the icon stacked above its cumulative tally. Tallies
+    // appear left-to-right with a small stagger so the SKIP-COUNT reads as
+    // a temporal pattern (3, then 6, then 9, …) — same staggered cadence as
+    // pictograph icon pop-in, which kids already recognise.
+    //
+    // For TEACH lessons, tallies are scaffolding (showTally: true, default).
+    // For ARCADE questions where the kid must compute the total, callers
+    // pass showTally: false so the cumulative numbers don't leak the answer.
+    const cells = [];
+    for (let i = 0; i < count; i++) {
+      const cumulative = (i + 1) * scale;
+      cells.push(
+        `<div class="scp-cell" style="animation-delay:${200 + i * 90}ms">
+           <span class="scp-icon">${icon}</span>
+           ${showTally ? `<span class="scp-tally">${cumulative}</span>` : ''}
+         </div>`
+      );
+    }
+    wrap.innerHTML = `
+      <div class="scp-row">${cells.join("")}</div>
+      ${label
+        ? `<div class="scp-label">${label}</div>`
+        : `<div class="scp-label">Each ${icon}: ${scale}  ·  count by ${scale}s</div>`
+      }
+    `;
     return wrap;
   });
 
@@ -675,12 +1299,22 @@
       if (Array.isArray(filled)) return filled.includes(idx);
       return idx < filled;
     };
+    // Tiles fill in row-by-row, then column-by-column within each row — same
+    // visual scan order a kid uses to count "1, 2, 3 ... 4, 5, 6 ..."
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const idx = r * cols + c;
         const x = c * cell, y = r * cell;
-        const fill = isFilled(idx) ? "#ffd93d" : "#fff";
-        squares.push(`<rect x="${x}" y="${y}" width="${cell}" height="${cell}"
+        const filledHere = isFilled(idx);
+        const fill = filledHere ? "#ffd93d" : "#fff";
+        // Only animate FILLED tiles (empty tiles are scaffold; they shouldn't
+        // pop in dramatically). The unfilled grid appears immediately so the
+        // child sees the boundary first, then watches it fill.
+        const cls = filledHere ? ' class="ag-tile"' : "";
+        const styleAttr = filledHere
+          ? ` style="animation-delay:${200 + idx * 60}ms"`
+          : "";
+        squares.push(`<rect${cls}${styleAttr} x="${x}" y="${y}" width="${cell}" height="${cell}"
           fill="${fill}" stroke="#6b5b95" stroke-width="1.5"/>`);
       }
     }
@@ -783,6 +1417,66 @@
     return wrap;
   });
 
+  // ---- capacityJugPair (two jugs side-by-side for comparison) ------------
+  // Used when a lesson asks the kid to compare two jugs' contents. The
+  // existing single-jug viz only renders ONE, forcing comparison practice
+  // to ask the kid to "imagine the other jug" — the same anti-pattern we
+  // flagged in fraction comparison. This primitive renders both jugs at the
+  // same physical scale (same pixel height = same logical max) so the kid
+  // can match fill levels by eye.
+  //
+  // Params:
+  //   left, right: { capacity, fill, unit, label }
+  //   maxCapacity: optional shared y-axis max (defaults to max of left/right
+  //                capacities so both jugs scale to the same physical height)
+  //   label:       caption below both jugs
+  register("capacityJugPair", function ({
+    left = { capacity: 1, fill: 0.5, unit: "L", label: "" },
+    right = { capacity: 1, fill: 0.5, unit: "L", label: "" },
+    maxCapacity = null,
+    label = null,
+  }) {
+    const w = 110, h_ = 180, pad = 14;
+    const maxCap = maxCapacity != null
+      ? maxCapacity
+      : Math.max(left.capacity || 1, right.capacity || 1);
+    function jugSvg(spec, xOffset) {
+      const cap = spec.capacity || 1;
+      const fillPct = Math.max(0, Math.min(1, spec.fill || 0));
+      // Scale this jug's drawn height proportionally to maxCap so the two
+      // jugs share a y-axis. A 1-L jug next to a 2-L jug renders at half
+      // the height — visually correct for the comparison.
+      const drawnH = (h_ - pad * 2) * (cap / maxCap);
+      const drawnTop = pad + (h_ - pad * 2 - drawnH);
+      const fillH = drawnH * fillPct;
+      const fillY = drawnTop + (drawnH - fillH);
+      const innerX = pad + 2 + xOffset;
+      return `
+        <rect x="${pad + xOffset}" y="${drawnTop}" width="${w - pad*2}" height="${drawnH}"
+              rx="10" fill="#fff" stroke="#6b5b95" stroke-width="3"/>
+        <rect x="${innerX}" y="${fillY}" width="${w - pad*2 - 4}" height="${fillH}"
+              rx="6" fill="#7dd3fc" opacity="0.75"/>
+        <line x1="${w - pad + xOffset}" y1="${drawnTop}" x2="${w - 2 + xOffset}" y2="${drawnTop}" stroke="#6b5b95" stroke-width="2"/>
+        <text x="${w + 2 + xOffset}" y="${drawnTop + 4}" font-family="Fredoka, sans-serif" font-size="12" font-weight="800" fill="#6b5b95">${cap} ${spec.unit || "L"}</text>
+        ${spec.label ? `<text x="${pad + xOffset + (w - pad*2)/2}" y="${h_ + 18}" text-anchor="middle"
+                          font-family="Fredoka, sans-serif" font-size="13" font-weight="800"
+                          fill="#3a2e5f">${spec.label}</text>` : ""}
+      `;
+    }
+    const totalW = w * 2 + 80;
+    const totalH = h_ + (left.label || right.label ? 28 : 0) + (label ? 24 : 0);
+    const wrap = h("div", { class: "teach-viz teach-jug teach-jug-pair" });
+    wrap.innerHTML = `<svg viewBox="0 0 ${totalW} ${totalH}" role="img"
+        aria-label="Compare two jugs">
+      ${jugSvg(left, 0)}
+      ${jugSvg(right, w + 60)}
+      ${label ? `<text x="${totalW/2}" y="${totalH - 4}" text-anchor="middle"
+                   font-family="Fredoka, sans-serif" font-size="13" font-weight="700"
+                   fill="#6b5b95">${label}</text>` : ""}
+    </svg>`;
+    return wrap;
+  });
+
   // ---- linePlot (static display: numeric scale with stacked X marks) ----
   // Used in teaching ops to show an example line plot.
   //   { type: "linePlot", params: { min: 1, max: 8, step: 1, unit: "in",
@@ -801,13 +1495,18 @@
     const railY = stackH + 8;
     const height = railY + 56;
 
+    // X marks pop in one at a time so the kid sees data being "plotted" — each
+    // measurement is a separate event. Global order is left-to-right by value,
+    // then bottom-to-top within a stack (matches how you'd add Xs by hand).
+    let xIdx = 0;
     const colParts = ticks.map((v, i) => {
       const x = pad + i * colW + colW / 2;
       const n = counts[v] || 0;
       const xs = [];
       for (let k = 0; k < n; k++) {
         const y = railY - 12 - k * rowH;
-        xs.push(`<text x="${x}" y="${y}" text-anchor="middle" font-family="Fredoka, sans-serif"
+        const delay = 200 + xIdx++ * 80;
+        xs.push(`<text class="lp-mark" style="animation-delay:${delay}ms" x="${x}" y="${y}" text-anchor="middle" font-family="Fredoka, sans-serif"
                    font-size="18" font-weight="900" fill="#ff7a93">✕</text>`);
       }
       const lit = highlight != null && Number(highlight) === Number(v);
@@ -946,5 +1645,335 @@
     const children = [bubble];
     if (label) children.push(h("div", { class: "teach-eg-label" }, label));
     return h("div", { class: "teach-viz teach-storyproblem" }, children);
+  });
+
+  // =====================================================================
+  // INTERACTIVE VIZ TYPES
+  // ---------------------------------------------------------------------
+  // These vizes let the kid DRIVE the manipulation. The static counterpart
+  // displays a finished representation; the interactive version requires
+  // the kid to do the action that builds it. Pedagogy from the PhD review:
+  //
+  //   1. Concrete-Pictorial-Abstract: kid physically partitions/builds
+  //   2. Kinesthetic engagement: tap/drag → immediate visual feedback
+  //   3. Working memory offload: the viz holds intermediate state
+  //   4. Autism-spectrum fit: predictable tap targets, color-coded regions,
+  //      consistent color language across the app (IN-blue, OUT-mint,
+  //      RULE-yellow, UNKNOWN-coral)
+  //   5. The viz IS the insight: doing the action delivers the lesson
+  //
+  // All five accept an optional `targetValue` param. When set, the readout
+  // shows a "Target: X" hint and the viz pulses green when the kid hits
+  // the target. Without it, the viz acts as a free-play exploration tool.
+  // =====================================================================
+
+  // ---- interactiveFractionBar -----------------------------------------
+  // Tap segments to shade. Live readout shows the resulting fraction.
+  // Use when the lesson asks the kid to BUILD a fraction (shade 3/4) or
+  // to COMPARE (drag two bars side by side).
+  register("interactiveFractionBar", function ({
+    denominator = 4, startNumer = 0, targetNumer = null, label = null,
+    color = "#ff7a93",
+  }) {
+    const denom = Math.max(1, Math.min(20, denominator | 0));
+    const wrap = h("div", { class: "teach-viz teach-ifb" });
+    let numer = Math.max(0, Math.min(denom, startNumer | 0));
+    function render() {
+      const segs = [];
+      for (let i = 0; i < denom; i++) {
+        const shaded = i < numer;
+        segs.push(
+          `<div class="ifb-seg ${shaded ? 'ifb-shaded' : ''}"
+                data-i="${i}"
+                role="button" tabindex="0"
+                aria-label="Segment ${i + 1} of ${denom}, ${shaded ? 'shaded' : 'empty'}"
+                style="--ifb-color:${color}"></div>`
+        );
+      }
+      const hit = (targetNumer != null && numer === targetNumer);
+      const status = (targetNumer != null)
+        ? `<div class="ifb-status ${hit ? 'ifb-hit' : ''}">
+             ${hit ? "✓ Got it!" : `Target: ${targetNumer}/${denom}`}
+           </div>`
+        : "";
+      wrap.innerHTML = `
+        <div class="ifb-bar">${segs.join("")}</div>
+        <div class="ifb-readout">Shaded: <strong>${numer}/${denom}</strong></div>
+        ${status}
+        ${label ? `<div class="ifb-label">${label}</div>` : ""}
+      `;
+      wrap.querySelectorAll(".ifb-seg").forEach((s) => {
+        const i = parseInt(s.getAttribute("data-i"), 10);
+        const flip = () => {
+          // Toggle "fill up to here": tap segment i sets numer to i+1 if
+          // that segment was previously empty, else to i (un-shade).
+          if (i + 1 <= numer) { numer = i; } else { numer = i + 1; }
+          render();
+        };
+        s.addEventListener("click", flip);
+        s.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); }
+        });
+      });
+    }
+    render();
+    return wrap;
+  });
+
+  // ---- interactiveNumberLine ------------------------------------------
+  // Tap on the line to place the marker. Snap to whole-number ticks (or
+  // to `step` if provided). Readout shows the chosen value; optional
+  // `targetValue` validates the kid's selection.
+  register("interactiveNumberLine", function ({
+    min = 0, max = 10, step = 1, startAt = null, targetValue = null,
+    showZones = false, label = null,
+  }) {
+    const range = max - min;
+    const wrap = h("div", { class: "teach-viz teach-inl" });
+    let at = (startAt != null) ? startAt : null;
+    function render() {
+      const W = 480, H = 90, pad = 30;
+      const ticks = [];
+      for (let v = min; v <= max; v += step) {
+        const x = pad + ((v - min) / range) * (W - 2 * pad);
+        ticks.push(`<line x1="${x}" y1="35" x2="${x}" y2="50" stroke="#6b5b95" stroke-width="1.5"/>`);
+        ticks.push(`<text x="${x}" y="68" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="12" font-weight="700" fill="#6b5b95">${v}</text>`);
+      }
+      let markerSvg = "";
+      let markerLabel = "Tap the line to place the marker.";
+      if (at != null) {
+        const x = pad + ((at - min) / range) * (W - 2 * pad);
+        markerSvg = `<g transform="translate(${x} 35)">
+          <circle r="11" fill="#ff7a93" stroke="#6b5b95" stroke-width="2"/>
+          <circle r="4" cx="-2" cy="-2" fill="#fff" opacity="0.5"/>
+        </g>`;
+        markerLabel = `You picked: <strong>${at}</strong>`;
+      }
+      // Optional rounding zones: split the line at the halfway between
+      // multiples of `step×10` (e.g., for round-to-nearest-10).
+      let zones = "";
+      if (showZones && range >= step * 5) {
+        // For now: simply render an IN-blue lower half and OUT-mint upper half
+        // around the midpoint. Concrete enough without bespoke "rounding"
+        // logic that would diverge from generic use.
+        const midX = pad + 0.5 * (W - 2 * pad);
+        zones = `
+          <rect x="${pad}" y="32" width="${midX - pad}" height="6" fill="#7dd3fc" opacity="0.35"/>
+          <rect x="${midX}" y="32" width="${W - pad - midX}" height="6" fill="#6ee7b7" opacity="0.35"/>
+        `;
+      }
+      const hit = (targetValue != null && at === targetValue);
+      const status = (targetValue != null)
+        ? `<div class="inl-status ${hit ? 'inl-hit' : ''}">
+             ${hit ? "✓ Yes!" : `Target: ${targetValue}`}
+           </div>`
+        : "";
+      wrap.innerHTML = `
+        <svg class="inl-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Number line from ${min} to ${max}">
+          ${zones}
+          <line x1="${pad}" y1="35" x2="${W - pad}" y2="35" stroke="#3a2e5f" stroke-width="2.5"/>
+          ${ticks.join("")}
+          ${markerSvg}
+          <rect class="inl-hit" x="0" y="0" width="${W}" height="${H}" fill="transparent" style="cursor: pointer"/>
+        </svg>
+        <div class="inl-readout">${markerLabel}</div>
+        ${status}
+        ${label ? `<div class="inl-label">${label}</div>` : ""}
+      `;
+      const svg = wrap.querySelector(".inl-svg");
+      const hit_ = wrap.querySelector(".inl-hit");
+      hit_.addEventListener("click", (e) => {
+        const rect = svg.getBoundingClientRect();
+        const ratio = (e.clientX - rect.left) / rect.width;
+        const value = min + ratio * range;
+        // Snap to nearest step
+        const snapped = min + Math.round((value - min) / step) * step;
+        at = Math.max(min, Math.min(max, snapped));
+        render();
+      });
+    }
+    render();
+    return wrap;
+  });
+
+  // ---- interactiveClock -----------------------------------------------
+  // Drag the minute hand around the dial; the hour hand interpolates.
+  // Digital readout shows the current time. Snap to 5-min increments.
+  register("interactiveClock", function ({
+    startHour = 12, startMinute = 0, targetHour = null, targetMinute = null,
+    label = null,
+  }) {
+    const wrap = h("div", { class: "teach-viz teach-iclock" });
+    let H = startHour, M = startMinute;
+    function render() {
+      const cx = 90, cy = 90, r = 76;
+      const hourDeg = ((H % 12) * 30) + (M / 60) * 30;
+      const minDeg = M * 6;
+      const hourLen = 38, minLen = 60;
+      const hx = cx + hourLen * Math.sin(hourDeg * Math.PI / 180);
+      const hy = cy - hourLen * Math.cos(hourDeg * Math.PI / 180);
+      const mx = cx + minLen * Math.sin(minDeg * Math.PI / 180);
+      const my = cy - minLen * Math.cos(minDeg * Math.PI / 180);
+      // Hour numbers
+      const nums = [];
+      for (let n = 1; n <= 12; n++) {
+        const a = n * 30 * Math.PI / 180;
+        const nx = cx + (r - 14) * Math.sin(a);
+        const ny = cy - (r - 14) * Math.cos(a) + 5;
+        nums.push(`<text x="${nx}" y="${ny}" text-anchor="middle" font-family="Fredoka, sans-serif" font-size="14" font-weight="800" fill="#6b5b95">${n}</text>`);
+      }
+      const padded = String(M).padStart(2, "0");
+      const targetHit = (targetHour != null && targetMinute != null &&
+                        H === targetHour && M === targetMinute);
+      const status = (targetHour != null)
+        ? `<div class="iclk-status ${targetHit ? 'iclk-hit' : ''}">
+             ${targetHit ? "✓ Got it!" : `Target: ${targetHour}:${String(targetMinute || 0).padStart(2, "0")}`}
+           </div>`
+        : "";
+      wrap.innerHTML = `
+        <svg class="iclk-svg" viewBox="0 0 180 180" role="img" aria-label="Clock at ${H}:${padded}">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff8ed" stroke="#6b5b95" stroke-width="3"/>
+          ${nums.join("")}
+          <line x1="${cx}" y1="${cy}" x2="${hx.toFixed(2)}" y2="${hy.toFixed(2)}" stroke="#3a2e5f" stroke-width="5" stroke-linecap="round"/>
+          <line x1="${cx}" y1="${cy}" x2="${mx.toFixed(2)}" y2="${my.toFixed(2)}" stroke="#a78bfa" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="${cx}" cy="${cy}" r="3" fill="#3a2e5f"/>
+          <rect class="iclk-hit" x="0" y="0" width="180" height="180" fill="transparent" style="cursor: pointer"/>
+        </svg>
+        <div class="iclk-digital">${H}:${padded}</div>
+        ${status}
+        ${label ? `<div class="iclk-label">${label}</div>` : ""}
+      `;
+      const svg = wrap.querySelector(".iclk-svg");
+      const hit_ = wrap.querySelector(".iclk-hit");
+      function setFromXY(e) {
+        const rect = svg.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width * 180 - cx;
+        const y = (e.clientY - rect.top) / rect.height * 180 - cy;
+        // Compute angle from center, where 0deg = 12 o'clock (north).
+        let a = Math.atan2(x, -y) * 180 / Math.PI;
+        if (a < 0) a += 360;
+        // Snap to 5-min ticks (= 30deg each, since 60/5 = 12 ticks)
+        const minute = Math.round(a / 6) % 60;
+        M = minute;
+        render();
+      }
+      hit_.addEventListener("click", setFromXY);
+      // For drag: track pointer move within the SVG bounds
+      let dragging = false;
+      hit_.addEventListener("pointerdown", (e) => { dragging = true; setFromXY(e); hit_.setPointerCapture(e.pointerId); });
+      hit_.addEventListener("pointermove", (e) => { if (dragging) setFromXY(e); });
+      hit_.addEventListener("pointerup",   (e) => { dragging = false; hit_.releasePointerCapture(e.pointerId); });
+    }
+    render();
+    return wrap;
+  });
+
+  // ---- interactiveAreaGrid (tap-to-fill) ------------------------------
+  // Start with an empty rows×cols grid. Kid taps tiles to fill them.
+  // Counter updates live. Use for "what's the area?" by filling all,
+  // or "fill 6 tiles" with a target.
+  register("interactiveAreaGrid", function ({
+    rows = 3, cols = 4, targetCount = null, label = null,
+  }) {
+    const wrap = h("div", { class: "teach-viz teach-iag" });
+    const total = rows * cols;
+    const filled = new Set();
+    function render() {
+      const cell = 36;
+      const W = cols * cell + 4;
+      const H = rows * cell + 4;
+      const tiles = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const idx = r * cols + c;
+          const x = c * cell + 2, y = r * cell + 2;
+          const isFilled = filled.has(idx);
+          tiles.push(`<rect class="iag-tile ${isFilled ? 'iag-filled' : ''}"
+            data-idx="${idx}"
+            x="${x}" y="${y}" width="${cell - 2}" height="${cell - 2}"
+            fill="${isFilled ? '#ffd93d' : '#fff'}" stroke="#6b5b95" stroke-width="1.5"
+            style="cursor: pointer" tabindex="0"/>`);
+        }
+      }
+      const count = filled.size;
+      const hit = (targetCount != null && count === targetCount);
+      const status = (targetCount != null)
+        ? `<div class="iag-status ${hit ? 'iag-hit' : ''}">
+             ${hit ? "✓ Got it!" : `Target: ${targetCount} tiles`}
+           </div>`
+        : "";
+      wrap.innerHTML = `
+        <svg class="iag-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${rows} by ${cols} grid">
+          ${tiles.join("")}
+        </svg>
+        <div class="iag-readout">Filled: <strong>${count}</strong> of ${total}</div>
+        ${status}
+        ${label ? `<div class="iag-label">${label}</div>` : ""}
+      `;
+      wrap.querySelectorAll(".iag-tile").forEach((t) => {
+        t.addEventListener("click", () => {
+          const i = parseInt(t.getAttribute("data-idx"), 10);
+          if (filled.has(i)) filled.delete(i); else filled.add(i);
+          render();
+        });
+      });
+    }
+    render();
+    return wrap;
+  });
+
+  // ---- interactiveCoinPile --------------------------------------------
+  // A "coin bank" of denominations. Kid taps a coin to add to their
+  // "pile" (which appears below). Running total updates. Tap a piled
+  // coin to remove it.
+  register("interactiveCoinPile", function ({
+    targetCents = null, bank = ["quarter", "dime", "nickel", "penny"],
+    label = null,
+  }) {
+    const VALUE = { quarter: 25, dime: 10, nickel: 5, penny: 1 };
+    const COLOR = { quarter: "#d4a373", dime: "#c4b5fd", nickel: "#9a8bbf", penny: "#ff7a93" };
+    const wrap = h("div", { class: "teach-viz teach-icp" });
+    const pile = [];
+    function render() {
+      const bankChips = bank.map((k) =>
+        `<button class="icp-bank-coin" data-coin="${k}" style="background:${COLOR[k]}; color: #fff">
+           ${VALUE[k]}¢
+         </button>`).join("");
+      const pileChips = pile.length
+        ? pile.map((k, i) =>
+            `<button class="icp-pile-coin" data-i="${i}" style="background:${COLOR[k]}; color: #fff" title="Tap to remove">
+               ${VALUE[k]}¢
+             </button>`).join("")
+        : `<span class="icp-empty">Tap a coin above to add it to your pile.</span>`;
+      const total = pile.reduce((s, k) => s + VALUE[k], 0);
+      const hit = (targetCents != null && total === targetCents);
+      const status = (targetCents != null)
+        ? `<div class="icp-status ${hit ? 'icp-hit' : ''}">
+             ${hit ? "✓ Got it!" : `Target: ${targetCents}¢`}
+           </div>`
+        : "";
+      wrap.innerHTML = `
+        <div class="icp-bank">${bankChips}</div>
+        <div class="icp-pile">${pileChips}</div>
+        <div class="icp-readout">Total: <strong>${total}¢</strong></div>
+        ${status}
+        ${label ? `<div class="icp-label">${label}</div>` : ""}
+      `;
+      wrap.querySelectorAll(".icp-bank-coin").forEach((b) => {
+        b.addEventListener("click", () => {
+          pile.push(b.getAttribute("data-coin"));
+          render();
+        });
+      });
+      wrap.querySelectorAll(".icp-pile-coin").forEach((p) => {
+        p.addEventListener("click", () => {
+          const i = parseInt(p.getAttribute("data-i"), 10);
+          pile.splice(i, 1);
+          render();
+        });
+      });
+    }
+    render();
+    return wrap;
   });
 })();

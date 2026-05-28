@@ -373,7 +373,7 @@ body.calm-mode .teach-bead-pop { animation: none !important; }
   font-weight: 800;
   color: var(--c-berry);
 }
-.teach-clock svg { max-width: 200px; height: auto; }
+.teach-clock svg { width: 200px; max-width: 100%; height: auto; }
 
 /* ==========================================================================
    Viz: digital clock & clock pair (elapsed-time teaching)
@@ -504,6 +504,237 @@ body.calm-mode .teach-bead-pop { animation: none !important; }
 .teach-perimeter svg,
 .teach-jug svg { max-width: 100%; height: auto; }
 
+/* Cap viz SVGs at sensible sizes inside teach practice cards. Without a max,
+ * SVGs with only viewBox (no width/height attrs) expand to the container
+ * width — which makes a 120-px capacityJug fill the whole card on a unit-
+ * classification question. Per-viz max-widths keep the visual proportional
+ * to its information density. */
+.teach-jug svg       { max-width: 160px; }
+
+/* ---- breakApartArray viz ------------------------------------------------
+ * Interactive distributive-property practice. The kid taps between any two
+ * rows to set the split; the array color-codes the two pieces and a side
+ * readout updates with each piece's product and the sum. */
+.teach-break-apart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 6px;
+}
+.teach-break-apart .ba-grid {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.teach-break-apart .ba-grid svg {
+  max-width: 320px;
+  height: auto;
+}
+.teach-break-apart .ba-split-line {
+  /* SVG <line> already gets stroke; this rule is here so a future overlay
+   * could pulse the split line to invite interaction. Currently a no-op. */
+  pointer-events: none;
+}
+.teach-break-apart .ba-gap-band:hover {
+  fill: rgba(167, 139, 250, 0.12);
+}
+.teach-break-apart .ba-gap-band:active {
+  fill: rgba(167, 139, 250, 0.25);
+}
+.teach-break-apart .ba-readout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  width: 100%;
+  max-width: 360px;
+  font-family: var(--font-display, "Fredoka", sans-serif);
+}
+.teach-break-apart .ba-piece {
+  padding: 10px 12px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #3a2e5f;
+  border: 2px solid currentColor;
+  background: rgba(255, 255, 255, 0.6);
+}
+.teach-break-apart .ba-piece-top    { color: #2a8db5; background: rgba(125, 211, 252, 0.22); }
+.teach-break-apart .ba-piece-bottom { color: #1f7a52; background: rgba(110, 231, 183, 0.22); }
+.teach-break-apart .ba-piece-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+}
+.teach-break-apart .ba-piece-eq {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.teach-break-apart .ba-sum {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 10px 12px;
+  background: #fff7d6;
+  border: 2px solid #d4a017;
+  color: #6b4f00;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+.teach-break-apart .ba-label {
+  font-size: 0.85rem;
+  color: var(--c-ink-soft, #6b5b95);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* ---- Interactive viz family — shared structure -------------------------
+ * All five interactive vizes share a "viz block + readout + status + label"
+ * vertical stack. Status appears only when targetValue is set; pulses green
+ * when the kid hits the target. */
+.teach-ifb,
+.teach-inl,
+.teach-iclock,
+.teach-iag,
+.teach-icp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 6px;
+}
+.ifb-readout, .inl-readout, .iclk-digital, .iag-readout, .icp-readout {
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #3a2e5f;
+}
+.ifb-status, .inl-status, .iclk-status, .iag-status, .icp-status {
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-size: 0.9rem;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fff7d6;
+  color: #6b4f00;
+  border: 2px solid #d4a017;
+}
+.ifb-hit, .inl-hit, .iclk-hit, .iag-hit, .icp-hit {
+  background: #6ee7b7 !important;
+  border-color: #10b981 !important;
+  color: #064e3b !important;
+  animation: tv-pop 360ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ifb-label, .inl-label, .iclk-label, .iag-label, .icp-label {
+  font-size: 0.85rem;
+  color: var(--c-ink-soft, #6b5b95);
+  font-weight: 700;
+}
+
+/* interactiveFractionBar — tap segments to shade */
+.teach-ifb .ifb-bar {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  max-width: 360px;
+  background: #f1ecff;
+  border: 3px solid #6b5b95;
+  border-radius: 12px;
+  padding: 4px;
+}
+.teach-ifb .ifb-seg {
+  flex: 1;
+  height: 56px;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 120ms ease, transform 80ms ease;
+}
+.teach-ifb .ifb-seg:hover { transform: translateY(-1px); }
+.teach-ifb .ifb-seg:active { transform: translateY(0); }
+.teach-ifb .ifb-shaded { background: var(--ifb-color, #ff7a93); }
+
+/* interactiveNumberLine — tap line to drop marker */
+.teach-inl .inl-svg { max-width: 480px; height: auto; width: 100%; }
+
+/* interactiveClock — drag the minute hand */
+.teach-iclock .iclk-svg { max-width: 220px; height: auto; }
+.teach-iclock .iclk-digital {
+  background: #1f1436;
+  color: #ffd93d;
+  font-family: "Courier New", Menlo, monospace;
+  font-size: 1.8rem;
+  font-weight: 800;
+  padding: 6px 16px;
+  border-radius: 8px;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 6px #ffd93d;
+}
+
+/* interactiveAreaGrid — tap tiles to fill */
+.teach-iag .iag-svg { max-width: 320px; height: auto; }
+.teach-iag .iag-tile { transition: fill 120ms ease; }
+.teach-iag .iag-tile:hover { fill: #fff7d6; }
+.teach-iag .iag-filled:hover { fill: #f6c800 !important; }
+
+/* interactiveCoinPile — tap to build a coin pile */
+.teach-icp .icp-bank, .teach-icp .icp-pile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  max-width: 480px;
+}
+.teach-icp .icp-bank {
+  padding: 10px;
+  background: #fff8ed;
+  border: 2px dashed #6b5b95;
+  border-radius: 12px;
+}
+.teach-icp .icp-pile {
+  min-height: 50px;
+  padding: 10px;
+  background: rgba(167, 139, 250, 0.08);
+  border: 2px solid #a78bfa;
+  border-radius: 12px;
+  align-items: center;
+}
+.teach-icp .icp-bank-coin, .teach-icp .icp-pile-coin {
+  border: 2px solid #6b5b95;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 80ms ease;
+}
+.teach-icp .icp-bank-coin:hover { transform: translateY(-2px); }
+.teach-icp .icp-pile-coin:hover { transform: translateY(-1px); }
+.teach-icp .icp-empty {
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-size: 0.85rem;
+  color: var(--c-ink-soft, #6b5b95);
+  font-style: italic;
+}
+.teach-perimeter svg { max-width: 280px; }
+.teach-areagrid svg  { max-width: 320px; }
+.teach-timeline svg  { max-width: 100%; }
+.teach-clock svg     { max-width: 200px; }
+.teach-clock-pair svg{ max-width: 160px; }
+.teach-fb svg, .teach-fractionbar svg { max-width: 360px; }
+.teach-numline svg, .teach-numberline svg { max-width: 100%; }
+.teach-bar svg, .teach-barchart svg { max-width: 360px; }
+.teach-lineplot svg  { max-width: 360px; }
+.teach-shapegrid svg { max-width: 220px; }
+.teach-array svg     { max-width: 300px; }
+.teach-unitscale svg { max-width: 320px; }
+
 .teach-pictograph { flex-direction: column; gap: 8px; }
 .teach-pg-rows { display: grid; gap: 6px; padding: 6px 10px; }
 .teach-pg-row {
@@ -622,8 +853,122 @@ body.calm-mode .teach-bead-pop { animation: none !important; }
 }
 .wp-visual { display: grid; justify-items: center; gap: 10px; margin-top: 14px; }
 .wp-emoji { font-size: 2.4rem; line-height: 1; }
+/* When a word-problem question carries its own viz, the wrapper just hosts
+   the rendered MR.Viz node; no decorative emoji or hint-bar needed.
+   The grid layout of .wp-visual centers its child but doesn't constrain
+   width, so SVGs without explicit width attributes collapse to 0×0. The
+   `width: 100%; max-width` floor below gives any SVG-based viz a sensible
+   default while keeping it responsive on narrow screens. */
+.wp-visual-viz { padding: 6px 0; width: 100%; }
+.wp-visual-viz svg { width: 100%; max-width: 320px; height: auto; }
+
+/* ---------- skipCountPicto: icons with cumulative skip-count beneath ----------
+   Used by pictograph word problems. Each cell stacks the icon above its
+   cumulative tally so the kid sees the skip-count pattern (3, 6, 9, …) as
+   a literal sequence under the icons they're counting. */
+.teach-skipcountpicto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+}
+.scp-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 4px 10px;
+}
+.scp-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 36px;
+  animation: tv-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+.scp-icon {
+  font-size: 1.7rem;
+  line-height: 1;
+}
+.scp-tally {
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--c-ink, #3a2e5f);
+  background: var(--c-cream, #fff7e6);
+  border: 2px solid var(--c-ink-soft, #6b5b95);
+  border-radius: 8px;
+  padding: 2px 8px;
+  min-width: 28px;
+  text-align: center;
+}
+.scp-label {
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--c-ink-soft, #6b5b95);
+  text-align: center;
+}
+body.calm-mode .scp-cell { animation: none !important; }
 .wp-hint-bar {
   font-style: italic;
   color: var(--c-ink-soft);
   font-size: 0.95rem;
 }
+
+/* ==========================================================================
+   Viz: functionTable (Function Machine + IN/OUT table)
+
+   Layout: machine on the left, table on the right, caption underneath.
+   On narrow screens they stack — the machine drops above the table so the
+   reading order (machine → table) is preserved.
+   ========================================================================== */
+.teach-functiontable {
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 6px;
+  width: 100%;
+}
+.ft-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.ft-machine {
+  flex: 0 1 360px;
+  max-width: 100%;
+}
+.ft-machine-svg { width: 100%; height: auto; max-width: 360px; }
+.ft-table {
+  flex: 0 1 220px;
+  max-width: 100%;
+}
+.ft-table-svg { width: 100%; height: auto; max-width: 220px; }
+.ft-caption {
+  font-family: var(--font-display, "Fredoka", sans-serif);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--c-ink-soft, #6b5b95);
+  text-align: center;
+  padding: 0 12px;
+}
+
+/* The rule box "thinks" with a gentle pulse when the rule is unknown
+   (Stage D — detective). Steady on every other stage. */
+.ft-rule-unknown {
+  animation: ft-pulse 1.8s ease-in-out infinite;
+  transform-origin: 170px 88px;
+}
+@keyframes ft-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.85; transform: scale(1.04); }
+}
+
+/* Calm mode: hold the design but stop motion. The rule box stays a steady
+   colour, autoPlay still cycles (predictable cadence, no easing wobble). */
+body.calm-mode .ft-rule-unknown { animation: none !important; }

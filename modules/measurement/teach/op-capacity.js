@@ -41,12 +41,14 @@
         practice: [
           {
             prompt: "Which unit for a bathtub?",
+            viz: { type: "capacityJug", params: { capacity: 1, fill: 1, unit: "L", label: "Many liters fill a bathtub" } },
             options: ["mL", "L"],
             answer: "L",
             hint: "Bathtubs hold a LOT. Tiny units would take thousands.",
           },
           {
             prompt: "Which unit for a spoonful of syrup?",
+            viz: { type: "capacityJug", params: { capacity: 1000, fill: 0.01, unit: "mL", label: "About 10 mL — a spoonful" } },
             options: ["mL", "L"],
             answer: "mL",
             hint: "A spoon is small — smaller than a cup.",
@@ -76,18 +78,20 @@
           { text: "Jug B holds 1 L, totally full.",
             viz: { type: "capacityJug", params: { capacity: 1, fill: 1, unit: "L", label: "1 L, full = 1 L" } } },
           { text: "Both have 1 liter inside! Same amount, different-looking jugs.",
-            equation: "Both = 1 L" },
+            equation: "Both jugs: 1 L" },
           { text: "Lesson: to compare, multiply capacity × fill-fraction. Don't trust just the fill line." },
         ],
         practice: [
           {
             prompt: "Jug X: 3 L, filled to 1/3. Jug Y: 2 L, filled to 1/2. Which has MORE?",
+            viz: { type: "capacityJugPair", params: { left: { capacity: 3, fill: 1/3, unit: "L", label: "Jug X (3 L, ⅓ full)" }, right: { capacity: 2, fill: 0.5, unit: "L", label: "Jug Y (2 L, half full)" } } },
             options: ["Jug X", "Jug Y", "equal"],
             answer: "equal",
             hint: "1/3 of 3 L = 1 L. 1/2 of 2 L = 1 L. They're equal.",
           },
           {
             prompt: "A full 500 mL bottle vs a half-full 1 L bottle — which is more?",
+            viz: { type: "capacityJugPair", params: { left: { capacity: 500, fill: 1, unit: "mL", label: "500 mL bottle, full" }, right: { capacity: 1000, fill: 0.5, unit: "mL", label: "1000 mL bottle, half full" } } },
             options: ["500 mL bottle", "1 L bottle", "equal"],
             answer: "equal",
             hint: "Half of 1 L is 500 mL. Same amount!",
@@ -116,18 +120,21 @@
         practice: [
           {
             prompt: "5 liters = how many milliliters?",
+            viz: { type: "functionTable", params: { rule: { op: "×", n: 1000 }, rows: [{ in: 5, out: null }], machine: { in: 5, out: null, showOut: true }, activeRowIdx: 0 } },
             options: ["50", "500", "5000"],
             answer: "5000",
             hint: "Multiply by 1000 — add three zeros.",
           },
           {
             prompt: "3000 mL = how many liters?",
+            viz: { type: "functionTable", params: { rule: { op: "÷", n: 1000 }, rows: [{ in: 3000, out: null }], machine: { in: 3000, out: null, showOut: true }, activeRowIdx: 0 } },
             options: ["3 L", "30 L", "300 L"],
             answer: "3 L",
             hint: "Divide by 1000 — take off three zeros.",
           },
           {
             prompt: "Is 1500 mL more or less than 1 liter?",
+            viz: { type: "capacityJug", params: { capacity: 2, fill: 0.75, unit: "L", label: "1500 mL — bigger or smaller than 1 L?" } },
             options: ["more", "less", "equal"],
             answer: "more",
             hint: "1 L = 1000 mL. 1500 is bigger than 1000.",

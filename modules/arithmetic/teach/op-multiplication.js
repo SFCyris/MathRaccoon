@@ -99,12 +99,14 @@
         ],
         practice: [
           {
-            prompt: "Skip count by 2, four times: 2, 4, 6, __.",
+            prompt: "Hop by 2 four times. Where do you land? That's 4 × 2.",
+            viz: { type: "numberLine", params: { min: 0, max: 10, at: 6, hops: [2, 4, 6] } },
             options: [7, 8, 9],
             answer: 8,
           },
           {
             prompt: "4 × 3 on a number line. Start at 0, hop 3 four times. Where do you land?",
+            viz: { type: "numberLine", params: { min: 0, max: 14, at: 0, hops: [3, 6, 9, 12] } },
             options: [9, 12, 15],
             answer: 12,
           },
@@ -116,30 +118,34 @@
         subtitle: "Split a tricky fact.",
         emoji: "✂️",
         idea: {
-          hook: "Tricky facts like 7 × 8 can be broken into easier pieces. 7 × 8 = (7 × 4) + (7 × 4) = 28 + 28 = 56.",
-          viz: { type: "array", params: { rows: 7, cols: 8 } },
-          caption: "Split the array in half. Easier to count two small pieces."
+          hook: "Tricky facts can be split into easier pieces. The blue piece below is 7 × 4 = 28. The mint piece is also 7 × 4 = 28. Together: 56. That's 7 × 8.",
+          viz: { type: "breakApartArray", params: { rows: 7, cols: 8, splitAxis: "col", splitTarget: 4, label: "7 × 8 split down the middle." } },
+          caption: "Split the array. Each piece is an easier fact. Add the two pieces to get the total.",
         },
         watchMe: [
-          { text: "Let's find 6 × 7. That's a 6 × 7 array.",
-            viz: { type: "array", params: { rows: 6, cols: 7 } } },
-          { text: "Split it: 6 × 5 and 6 × 2.",
-            equation: "6 × 7 = (6 × 5) + (6 × 2)" },
-          { text: "6 × 5 = 30. 6 × 2 = 12. Add them: 30 + 12 = 42.",
-            equation: "30 + 12 = 42" },
-          { text: "So 6 × 7 = 42.", equation: "6 × 7 = 42" },
+          { text: "Start with 6 × 7. That's a 6 × 7 array.",
+            viz: { type: "breakApartArray", params: { rows: 6, cols: 7, splitAxis: "col", splitTarget: 1, showSum: false, label: "6 rows × 7 columns." } } },
+          { text: "Split the 7 columns into 5 + 2. The blue piece is 6 × 5. The mint piece is 6 × 2.",
+            viz: { type: "breakApartArray", params: { rows: 6, cols: 7, splitAxis: "col", splitTarget: 5, label: "Blue: 6 × 5 = 30. Mint: 6 × 2 = 12." } },
+            equation: "6 × 7 = 30 + 12" },
+          { text: "Both pieces add to the same total: 42. So 6 × 7 = 42.",
+            equation: "6 × 7 = 42" },
+          { text: "The split works on ANY tricky fact. Pick a friendly factor like 5 to split toward." },
         ],
         practice: [
           {
-            prompt: "7 × 6 = ? Try: (7 × 5) + (7 × 1).",
+            prompt: "Tap to split 7 × 6 into a 7×5 piece and a 7×1 piece. Add both pieces. What is the total?",
+            viz: { type: "breakApartArray", params: { rows: 7, cols: 6, splitAxis: "col", splitTarget: 5, label: "Tap to split. Add both colored pieces." } },
             options: [40, 42, 44],
             answer: 42,
-            hint: "7 × 5 = 35. 7 × 1 = 7. 35 + 7 = 42."
+            hint: "Look at the blue piece: 7 × 5. Look at the mint piece: 7 × 1. Add their products.",
           },
           {
-            prompt: "8 × 6 = ? Try (8 × 5) + (8 × 1).",
+            prompt: "Tap to split 8 × 6 into a 8×5 piece and a 8×1 piece. What is the total?",
+            viz: { type: "breakApartArray", params: { rows: 8, cols: 6, splitAxis: "col", splitTarget: 5, label: "Tap to split. Add both colored pieces." } },
             options: [40, 48, 56],
             answer: 48,
+            hint: "Blue: 8 × 5. Mint: 8 × 1. Add their products.",
           },
         ],
       },
