@@ -2,6 +2,17 @@
 
 A gentle, offline-friendly learning app for kids. Four math books — Arithmetic, Measurement, Geometry, Data — plus a Reading Raccoon module for vocabulary, grammar, phonics, figurative language, and comprehension. Each module has story chapters, arcade games, and a Teaching Corner. No ads. No tracking. No accounts.
 
+<p align="center">
+  <a href="https://github.com/SFCyris/MathRaccoon/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue.svg" alt="License: Apache 2.0"></a>
+  <a href="https://github.com/SFCyris/MathRaccoon/releases/latest"><img src="https://img.shields.io/github/v/release/SFCyris/MathRaccoon?include_prereleases&sort=semver" alt="Latest release"></a>
+  <a href="https://github.com/SFCyris/MathRaccoon/releases/latest/download/math-raccoon-latest.zip"><img src="https://img.shields.io/github/downloads/SFCyris/MathRaccoon/total?label=downloads&color=success" alt="Total downloads"></a>
+</p>
+
+<p align="center">
+  <strong><a href="https://github.com/SFCyris/MathRaccoon/releases/latest/download/math-raccoon-latest.zip">⬇&nbsp; Download the latest release</a></strong>
+  &nbsp;·&nbsp; <a href="https://github.com/SFCyris/MathRaccoon/releases/latest">release notes</a>
+</p>
+
 **Repository:** <https://github.com/SFCyris/MathRaccoon>
 **License:** [Apache 2.0](LICENSE) (source code) · [trademarks reserved](NOTICE.md)
 
